@@ -1,28 +1,33 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { saveEntry } from "@/lib/diary-store"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { saveEntry } from '@/lib/diary-store';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { useLanguage } from './language-toggle';
+import { translations } from '@/lib/translations';
 
 export function DiaryForm() {
-  const router = useRouter()
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { language } = useLanguage();
+
+  const t = translations[language];
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!title.trim() || !content.trim()) return
+    e.preventDefault();
+    if (!title.trim() || !content.trim()) return;
 
-    setIsSubmitting(true)
-    saveEntry({ title: title.trim(), content: content.trim() })
-    router.push("/diary")
-  }
+    setIsSubmitting(true);
+    saveEntry({ title: title.trim(), content: content.trim() });
+    router.push('/diary');
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -33,34 +38,42 @@ export function DiaryForm() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="font-serif text-2xl font-semibold text-foreground">New Entry</h1>
+        <h1 className="font-serif text-2xl font-semibold text-foreground">
+          {t.newEntry}
+        </h1>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="title" className="mb-2 block text-sm font-medium text-foreground">
-            Title
+          <label
+            htmlFor="title"
+            className="mb-2 block text-sm font-medium text-foreground"
+          >
+            {t.newEntryTitle}
           </label>
           <input
             id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Give your entry a title..."
+            placeholder={t.newEntryTitlePlaceholder}
             className="w-full rounded-lg border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="content" className="mb-2 block text-sm font-medium text-foreground">
-            Write your thoughts
+          <label
+            htmlFor="content"
+            className="mb-2 block text-sm font-medium text-foreground"
+          >
+            {t.newEntryDescription}
           </label>
           <textarea
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="What's on your mind today..."
+            placeholder={t.newEntryDescriptionPlaceholder}
             rows={12}
             className="w-full resize-none rounded-lg border border-border bg-card px-4 py-3 text-foreground leading-relaxed placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             required
@@ -72,19 +85,19 @@ export function DiaryForm() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push("/diary")}
+          onClick={() => router.push('/diary')}
           className="border-border text-foreground hover:bg-secondary"
         >
-          Cancel
+          {t.cancel}
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting || !title.trim() || !content.trim()}
           className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {isSubmitting ? "Saving..." : "Save Entry"}
+          {isSubmitting ? 'Saving...' : t.saveEntry}
         </Button>
       </div>
     </form>
-  )
+  );
 }

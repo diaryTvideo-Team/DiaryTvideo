@@ -1,7 +1,8 @@
-import { AuthForm } from "@/components/auth-form"
-import { BookOpen } from "lucide-react"
-import Link from "next/link"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { AuthForm } from '@/components/auth-form';
+import { BookOpen } from 'lucide-react';
+import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { COOMON_TRANSLATIONS } from '@/lib/translations';
 
 export default function RegisterPage() {
   return (
@@ -10,7 +11,9 @@ export default function RegisterPage() {
         <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 w-fit">
             <BookOpen className="h-6 w-6 text-primary" />
-            <span className="font-serif text-xl font-semibold text-foreground">My Diary</span>
+            <span className="font-serif text-xl font-semibold text-foreground">
+              {COOMON_TRANSLATIONS.project_name}
+            </span>
           </Link>
           <ThemeToggle />
         </div>
@@ -19,5 +22,5 @@ export default function RegisterPage() {
         <AuthForm mode="register" />
       </div>
     </main>
-  )
+  );
 }

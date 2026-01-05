@@ -1,39 +1,37 @@
-"use client"
+'use client';
 
-import { useEffect } from "react"
-import { X, Calendar } from "lucide-react"
-import type { DiaryEntry } from "@/lib/diary-store"
+import { useEffect } from 'react';
+import { X, Calendar } from 'lucide-react';
+import type { DiaryEntry } from '@/lib/diary-store';
+import { Language } from '@/lib/translations';
+import { useFormattedDate } from '@/lib/formattedDate';
 
 interface DiaryModalProps {
-  entry: DiaryEntry | null
-  onClose: () => void
+  entry: DiaryEntry | null;
+  onClose: () => void;
+  language: Language;
 }
 
-export function DiaryModal({ entry, onClose }: DiaryModalProps) {
+export function DiaryModal({ entry, onClose, language }: DiaryModalProps) {
+  const formattedDate = useFormattedDate({ entry, language });
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
-    }
+      if (e.key === 'Escape') onClose();
+    };
 
     if (entry) {
-      document.body.style.overflow = "hidden"
-      window.addEventListener("keydown", handleEscape)
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleEscape);
     }
 
     return () => {
-      document.body.style.overflow = ""
-      window.removeEventListener("keydown", handleEscape)
-    }
-  }, [entry, onClose])
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [entry, onClose]);
 
-  if (!entry) return null
-
-  const formattedDate = entry.createdAt.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+  if (!entry) return null;
 
   return (
     <div
@@ -60,11 +58,18 @@ export function DiaryModal({ entry, onClose }: DiaryModalProps) {
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto p-6" style={{ maxHeight: "calc(85vh - 73px)" }}>
-          <h2 className="font-serif text-2xl font-semibold text-foreground">{entry.title}</h2>
-          <div className="mt-6 text-foreground/80 leading-relaxed whitespace-pre-wrap">{entry.content}</div>
+        <div
+          className="overflow-y-auto p-6"
+          style={{ maxHeight: 'calc(85vh - 73px)' }}
+        >
+          <h2 className="font-serif text-2xl font-semibold text-foreground">
+            {entry.title}
+          </h2>
+          <div className="mt-6 text-foreground/80 leading-relaxed whitespace-pre-wrap">
+            {entry.content}
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

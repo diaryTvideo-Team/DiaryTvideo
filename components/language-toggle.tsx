@@ -1,74 +1,89 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { createContext, useContext, useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Languages } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { createContext, useContext, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Languages } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-export type Language = "en" | "ko"
+export type Language = 'en' | 'ko';
 
 const LanguageContext = createContext<{
-  language: Language
-  setLanguage: (lang: Language) => void
-} | null>(null)
+  language: Language;
+  setLanguage: (lang: Language) => void;
+} | null>(null);
 
 export function useLanguage() {
-  const context = useContext(LanguageContext)
+  const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error("useLanguage must be used within LanguageProvider")
+    throw new Error('useLanguage must be used within LanguageProvider');
   }
-  return context
+  return context;
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("en")
-  const [mounted, setMounted] = useState(false)
+  const [language, setLanguageState] = useState<Language>('en');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-    const stored = localStorage.getItem("language") as Language
-    if (stored === "en" || stored === "ko") {
-      setLanguageState(stored)
+    setMounted(true);
+    const stored = localStorage.getItem('language') as Language;
+    if (stored === 'en' || stored === 'ko') {
+      setLanguageState(stored);
     }
-  }, [])
+  }, []);
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang)
-    localStorage.setItem("language", lang)
-  }
+    setLanguageState(lang);
+    localStorage.setItem('language', lang);
+  };
 
   if (!mounted) {
-    return null
+    return null;
   }
 
-  return <LanguageContext.Provider value={{ language, setLanguage }}>{children}</LanguageContext.Provider>
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage }}>
+      {children}
+    </LanguageContext.Provider>
+  );
 }
 
-export function LanguageToggle({ onLanguageChange }: { onLanguageChange?: (lang: Language) => void }) {
-  const { language, setLanguage } = useLanguage()
-
-  const changeLanguage = (lang: Language) => {
-    setLanguage(lang)
-    onLanguageChange?.(lang)
-  }
+export function LanguageToggle() {
+  const { language, setLanguage } = useLanguage();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" title="Change language" className="h-9 w-9">
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Change language"
+          className="h-9 w-9"
+        >
           <Languages className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => changeLanguage("en")} className={language === "en" ? "bg-secondary" : ""}>
+        <DropdownMenuItem
+          onClick={() => setLanguage('en')}
+          className={language === 'en' ? 'bg-secondary' : ''}
+        >
           English
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => changeLanguage("ko")} className={language === "ko" ? "bg-secondary" : ""}>
+        <DropdownMenuItem
+          onClick={() => setLanguage('ko')}
+          className={language === 'ko' ? 'bg-secondary' : ''}
+        >
           한국어
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

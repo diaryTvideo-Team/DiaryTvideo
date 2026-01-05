@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import { useLanguage } from "@/components/language-toggle"
-import { useTranslation } from "@/lib/translations"
+import { useLanguage } from '@/components/language-toggle';
+import { translations } from '@/lib/translations';
 
 export function Footer() {
-  const { language } = useLanguage()
-  const t = useTranslation(language)
+  const { language } = useLanguage();
+  const t = translations[language];
 
   return (
     <footer className="mt-auto border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -17,8 +17,11 @@ export function Footer() {
 
           <div className="text-center text-sm text-muted-foreground md:text-right">
             <p>
-              {t.developedBy} v0 Team • {t.contact}:{" "}
-              <a href="mailto:developer@mydiary.com" className="text-foreground underline-offset-4 hover:underline">
+              {t.developedBy} v0 Team • {t.contact}:{' '}
+              <a
+                href="mailto:developer@mydiary.com"
+                className="text-foreground underline-offset-4 hover:underline"
+              >
                 developer@mydiary.com
               </a>
             </p>
@@ -27,5 +30,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

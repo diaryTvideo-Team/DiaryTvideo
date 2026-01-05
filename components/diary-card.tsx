@@ -1,23 +1,28 @@
-"use client"
+'use client';
 
-import { Play, Trash2, Calendar, Eye } from "lucide-react"
-import type { DiaryEntry } from "@/lib/diary-store"
+import { Play, Trash2, Calendar, Eye } from 'lucide-react';
+import type { DiaryEntry } from '@/lib/diary-store';
+import { Language } from '@/lib/translations';
+import { useFormattedDate } from '@/lib/formattedDate';
 
 interface DiaryCardProps {
-  entry: DiaryEntry
-  view: "video" | "text"
-  onDelete: (id: string) => void
-  onView: (entry: DiaryEntry) => void
+  entry: DiaryEntry;
+  view: 'video' | 'text';
+  onDelete: (id: string) => void;
+  onView: (entry: DiaryEntry) => void;
+  language: Language;
 }
 
-export function DiaryCard({ entry, view, onDelete, onView }: DiaryCardProps) {
-  const formattedDate = entry.createdAt.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+export function DiaryCard({
+  entry,
+  view,
+  onDelete,
+  onView,
+  language,
+}: DiaryCardProps) {
+  const formattedDate = useFormattedDate({ entry, language });
 
-  if (view === "video") {
+  if (view === 'video') {
     return (
       <div className="group relative overflow-hidden rounded-lg bg-card shadow-sm transition-shadow hover:shadow-md">
         <button
@@ -30,12 +35,16 @@ export function DiaryCard({ entry, view, onDelete, onView }: DiaryCardProps) {
             </div>
           </div>
           <div className="absolute bottom-2 right-2 rounded bg-foreground/80 px-2 py-0.5 text-xs text-background">
-            AI Generated
+            {language === 'ko' ? 'AI 생성됨' : 'AI Generated'}
           </div>
         </button>
         <div className="p-4">
-          <h3 className="font-serif text-lg font-semibold text-foreground line-clamp-1">{entry.title}</h3>
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{entry.content}</p>
+          <h3 className="font-serif text-lg font-semibold text-foreground line-clamp-1">
+            {entry.title}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+            {entry.content}
+          </p>
           <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
@@ -60,14 +69,16 @@ export function DiaryCard({ entry, view, onDelete, onView }: DiaryCardProps) {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="rounded-lg border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-serif text-xl font-semibold text-foreground">{entry.title}</h3>
+          <h3 className="font-serif text-xl font-semibold text-foreground">
+            {entry.title}
+          </h3>
           <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
             <Calendar className="h-3.5 w-3.5" />
             {formattedDate}
@@ -90,10 +101,15 @@ export function DiaryCard({ entry, view, onDelete, onView }: DiaryCardProps) {
           </button>
         </div>
       </div>
-      <p className="mt-3 text-foreground/80 leading-relaxed whitespace-pre-wrap line-clamp-4">{entry.content}</p>
-      <button onClick={() => onView(entry)} className="mt-3 text-sm text-primary hover:underline">
-        Read more
+      <p className="mt-3 text-foreground/80 leading-relaxed whitespace-pre-wrap line-clamp-4">
+        {entry.content}
+      </p>
+      <button
+        onClick={() => onView(entry)}
+        className="mt-3 text-sm text-primary hover:underline"
+      >
+        {language === 'ko' ? '더보기' : 'Read more'}
       </button>
     </div>
-  )
+  );
 }
