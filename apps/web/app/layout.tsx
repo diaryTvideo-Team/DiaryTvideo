@@ -1,32 +1,32 @@
-import type React from 'react';
-import type { Metadata } from 'next';
-import { Analytics } from '@vercel/analytics/next';
-import { AuthProvider } from '@/components/auth-provider';
-import { LanguageProvider } from '@/components/language-toggle';
-import { ThemeProvider } from '@/components/theme-toggle';
-import { Footer } from '@/components/footer';
-import './globals.css';
+import type React from "react";
+import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { AuthProvider } from "@/components/auth-provider";
+import { LanguageProvider } from "@/components/language-toggle";
+import { ThemeProvider } from "@/components/theme-toggle";
+import { Footer } from "@/components/footer";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'My Diary',
-  description: 'Your personal space for thoughts and memories',
-  generator: 'v0.app',
+  title: "My Diary",
+  description: "Your personal space for thoughts and memories",
+  generator: "v0.app",
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
+        url: "/icon-light-32x32.png",
+        media: "(prefers-color-scheme: light)",
       },
       {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
+        url: "/icon-dark-32x32.png",
+        media: "(prefers-color-scheme: dark)",
       },
       {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: "/icon.svg",
+        type: "image/svg+xml",
       },
     ],
-    apple: '/apple-icon.png',
+    apple: "/apple-icon.png",
   },
 };
 
