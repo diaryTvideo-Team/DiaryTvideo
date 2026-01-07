@@ -1,5 +1,5 @@
 {
-  "name": "my-v0-project",
+  "name": "diarytvideo-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\" --ignore-path ../../.prettierignore",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\" --ignore-path ../../.prettierignore",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "echo [web]: notyet testing implemented!!"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
