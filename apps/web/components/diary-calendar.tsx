@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { Language } from '@/lib/translations';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Language } from "@/lib/translations";
 
 interface DiaryCalendarProps {
   entryDates: Date[];
@@ -33,40 +33,40 @@ export function DiaryCalendar({
   ).getDay();
 
   const monthNames_en = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const monthNames_ko = [
-    '1월',
-    '2월',
-    '3월',
-    '4월',
-    '5월',
-    '6월',
-    '7월',
-    '8월',
-    '9월',
-    '10월',
-    '11월',
-    '12월',
+    "1월",
+    "2월",
+    "3월",
+    "4월",
+    "5월",
+    "6월",
+    "7월",
+    "8월",
+    "9월",
+    "10월",
+    "11월",
+    "12월",
   ];
 
-  const dayNames_en = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const dayNames_ko = ['일', '월', '화', '수', '목', '금', '토'];
+  const dayNames_en = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dayNames_ko = ["일", "월", "화", "수", "목", "금", "토"];
 
-  const monthNames = language === 'ko' ? monthNames_ko : monthNames_en;
-  const dayNames = language === 'ko' ? dayNames_ko : dayNames_en;
+  const monthNames = language === "ko" ? monthNames_ko : monthNames_en;
+  const dayNames = language === "ko" ? dayNames_ko : dayNames_en;
 
   const prevMonth = () => {
     setCurrentMonth(
@@ -164,12 +164,12 @@ export function DiaryCalendar({
                 transition-colors
                 ${
                   isSelectedDay
-                    ? 'bg-primary text-primary-foreground'
+                    ? "bg-primary text-primary-foreground"
                     : hasEntryOnDay
-                      ? 'bg-accent text-accent-foreground hover:bg-accent/80'
-                      : 'hover:bg-muted'
+                      ? "bg-accent text-accent-foreground hover:bg-accent/80"
+                      : "hover:bg-muted"
                 }
-                ${isTodayDay && !isSelectedDay ? 'ring-1 ring-primary' : ''}
+                ${isTodayDay && !isSelectedDay ? "ring-1 ring-primary" : ""}
               `}
             >
               {day}

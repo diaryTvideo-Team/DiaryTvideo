@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 export interface User {
   id: string;
@@ -10,11 +10,11 @@ interface StoredUser extends User {
   password: string;
 }
 
-const USERS_KEY = 'diary_users';
-const CURRENT_USER_KEY = 'diary_current_user';
+const USERS_KEY = "diary_users";
+const CURRENT_USER_KEY = "diary_current_user";
 
 function getUsers(): StoredUser[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   const data = localStorage.getItem(USERS_KEY);
   return data ? JSON.parse(data) : [];
 }
@@ -31,7 +31,7 @@ export function register(
   const users = getUsers();
 
   if (users.find((u) => u.email.toLowerCase() === email.toLowerCase())) {
-    return { success: false, error: 'Email already registered' };
+    return { success: false, error: "Email already registered" };
   }
 
   const newUser: StoredUser = {
@@ -55,11 +55,11 @@ export function login(
   const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
 
   if (!user) {
-    return { success: false, error: 'User not found' };
+    return { success: false, error: "User not found" };
   }
 
   if (user.password !== btoa(password)) {
-    return { success: false, error: 'Invalid password' };
+    return { success: false, error: "Invalid password" };
   }
 
   const publicUser: User = { id: user.id, email: user.email, name: user.name };
@@ -73,7 +73,7 @@ export function logout() {
 }
 
 export function getCurrentUser(): User | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const data = localStorage.getItem(CURRENT_USER_KEY);
   return data ? JSON.parse(data) : null;
 }

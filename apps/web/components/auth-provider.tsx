@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   createContext,
@@ -6,12 +6,12 @@ import {
   useEffect,
   useState,
   type ReactNode,
-} from 'react';
+} from "react";
 import {
   getCurrentUser,
   logout as authLogout,
   type User,
-} from '@/lib/auth-store';
+} from "@/lib/auth-store";
 
 interface AuthContextType {
   user: User | null;

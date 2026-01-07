@@ -44,5 +44,6 @@ next-env.d.ts
 README.md
 *.md
 
-# monorepe
+# monorepo
 .turbo
+**/dist

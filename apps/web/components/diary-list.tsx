@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import { DiaryCard } from './diary-card';
-import { ViewToggle } from './view-toggle';
-import { DiaryFilter } from './diary-filter';
-import { DiaryCalendar } from './diary-calendar';
-import { DiaryModal } from './diary-modal';
-import { getEntries, deleteEntry, type DiaryEntry } from '@/lib/diary-store';
-import { BookOpen } from 'lucide-react';
-import { translations, type Language } from '@/lib/translations';
+import { useState, useEffect, useMemo } from "react";
+import { DiaryCard } from "./diary-card";
+import { ViewToggle } from "./view-toggle";
+import { DiaryFilter } from "./diary-filter";
+import { DiaryCalendar } from "./diary-calendar";
+import { DiaryModal } from "./diary-modal";
+import { getEntries, deleteEntry, type DiaryEntry } from "@/lib/diary-store";
+import { BookOpen } from "lucide-react";
+import { translations, type Language } from "@/lib/translations";
 
-export function DiaryList({ language = 'en' }: { language?: Language }) {
+export function DiaryList({ language = "en" }: { language?: Language }) {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
-  const [view, setView] = useState<'video' | 'text'>('text');
+  const [view, setView] = useState<"video" | "text">("text");
   const [mounted, setMounted] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null);
 
@@ -41,7 +41,7 @@ export function DiaryList({ language = 'en' }: { language?: Language }) {
   const filteredEntries = useMemo(() => {
     return entries.filter((entry) => {
       const matchesSearch =
-        searchQuery === '' ||
+        searchQuery === "" ||
         entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entry.content.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -103,7 +103,7 @@ export function DiaryList({ language = 'en' }: { language?: Language }) {
             </div>
             <div className="flex items-center gap-4">
               <p className="text-sm text-muted-foreground">
-                {filteredEntries.length}{' '}
+                {filteredEntries.length}{" "}
                 {filteredEntries.length === 1 ? t.entry : t.entries}
                 {(searchQuery || selectedDate) && ` (${t.filtered})`}
               </p>
@@ -120,7 +120,7 @@ export function DiaryList({ language = 'en' }: { language?: Language }) {
               <p className="text-muted-foreground">{t.noEntriesMatch}</p>
               <button
                 onClick={() => {
-                  setSearchQuery('');
+                  setSearchQuery("");
                   setSelectedDate(null);
                 }}
                 className="mt-2 text-sm text-primary hover:underline"
@@ -131,9 +131,9 @@ export function DiaryList({ language = 'en' }: { language?: Language }) {
           ) : (
             <div
               className={
-                view === 'video'
-                  ? 'grid gap-5 sm:grid-cols-2'
-                  : 'flex flex-col gap-4'
+                view === "video"
+                  ? "grid gap-5 sm:grid-cols-2"
+                  : "flex flex-col gap-4"
               }
             >
               {filteredEntries.map((entry) => (

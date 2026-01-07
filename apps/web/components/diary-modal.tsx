@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { X, Calendar } from 'lucide-react';
-import type { DiaryEntry } from '@/lib/diary-store';
-import { Language } from '@/lib/translations';
-import { useFormattedDate } from '@/lib/formattedDate';
+import { useEffect } from "react";
+import { X, Calendar } from "lucide-react";
+import type { DiaryEntry } from "@/lib/diary-store";
+import { Language } from "@/lib/translations";
+import { useFormattedDate } from "@/lib/formattedDate";
 
 interface DiaryModalProps {
   entry: DiaryEntry | null;
@@ -17,17 +17,17 @@ export function DiaryModal({ entry, onClose, language }: DiaryModalProps) {
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
 
     if (entry) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleEscape);
     }
 
     return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleEscape);
     };
   }, [entry, onClose]);
 
@@ -60,7 +60,7 @@ export function DiaryModal({ entry, onClose, language }: DiaryModalProps) {
         {/* Content */}
         <div
           className="overflow-y-auto p-6"
-          style={{ maxHeight: 'calc(85vh - 73px)' }}
+          style={{ maxHeight: "calc(85vh - 73px)" }}
         >
           <h2 className="font-serif text-2xl font-semibold text-foreground">
             {entry.title}

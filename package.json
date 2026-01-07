@@ -1,12 +1,15 @@
 {
-	"private": true,
-	"scripts": {
-    	"dev": "turbo run dev",
-    	"build": "turbo run build",
-    	"lint": "turbo run lint"
-  	},
-	"devDependencies": {
-		"turbo": "^2.7.3"
-	},
-	"packageManager": "pnpm@10.26.1"
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4",
+    "turbo": "^2.7.3"
+  },
+  "packageManager": "pnpm@10.26.1"
 }

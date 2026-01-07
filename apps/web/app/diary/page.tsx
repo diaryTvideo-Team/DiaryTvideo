@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { DiaryList } from '@/components/diary-list';
-import { Button } from '@/components/ui/button';
-import { PenLine, LogOut, BookOpen } from 'lucide-react';
-import { useAuth } from '@/components/auth-provider';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { LanguageToggle, useLanguage } from '@/components/language-toggle';
-import { translations } from '@/lib/translations';
+import { useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { DiaryList } from "@/components/diary-list";
+import { Button } from "@/components/ui/button";
+import { PenLine, LogOut, BookOpen } from "lucide-react";
+import { useAuth } from "@/components/auth-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle, useLanguage } from "@/components/language-toggle";
+import { translations } from "@/lib/translations";
 
 export default function DiaryPage() {
   const { user, isLoading, logout } = useAuth();
@@ -18,13 +18,13 @@ export default function DiaryPage() {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, isLoading, router]);
 
   const handleLogout = () => {
     logout();
-    router.push('/');
+    router.push("/");
   };
 
   const t = translations[language];

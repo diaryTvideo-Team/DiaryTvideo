@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-import type React from 'react';
+import type React from "react";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { login, register } from '@/lib/auth-store';
-import { useAuth } from '@/components/auth-provider';
-import { useLanguage } from './language-toggle';
-import { translations } from '@/lib/translations';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { login, register } from "@/lib/auth-store";
+import { useAuth } from "@/components/auth-provider";
+import { useLanguage } from "./language-toggle";
+import { translations } from "@/lib/translations";
 
 interface AuthFormProps {
-  mode: 'login' | 'register';
+  mode: "login" | "register";
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const { refreshUser } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { language } = useLanguage();
 
@@ -31,27 +31,27 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
-    if (mode === 'register') {
+    if (mode === "register") {
       const result = register(email, password, name);
       if (result.success) {
         const loginResult = login(email, password);
         if (loginResult.success) {
           refreshUser();
-          router.push('/diary');
+          router.push("/diary");
         }
       } else {
-        setError(result.error || 'Registration failed');
+        setError(result.error || "Registration failed");
       }
     } else {
       const result = login(email, password);
       if (result.success) {
         refreshUser();
-        router.push('/diary');
+        router.push("/diary");
       } else {
-        setError(result.error || 'Login failed');
+        setError(result.error || "Login failed");
       }
     }
 
@@ -62,14 +62,14 @@ export function AuthForm({ mode }: AuthFormProps) {
     <div className="w-full max-w-md mx-auto">
       <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
         <h1 className="font-serif text-3xl font-semibold text-foreground text-center mb-2">
-          {mode === 'login' ? t.welcomeBack : t.createAccount}
+          {mode === "login" ? t.welcomeBack : t.createAccount}
         </h1>
         <p className="text-muted-foreground text-center mb-8">
-          {mode === 'login' ? t.signInToContinue : t.startYourDiaryToday}
+          {mode === "login" ? t.signInToContinue : t.startYourDiaryToday}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {mode === 'register' && (
+          {mode === "register" && (
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input
@@ -123,17 +123,17 @@ export function AuthForm({ mode }: AuthFormProps) {
             disabled={isLoading}
           >
             {isLoading
-              ? 'Please wait...'
-              : mode === 'login'
+              ? "Please wait..."
+              : mode === "login"
                 ? t.signIn
                 : t.createAccount}
           </Button>
         </form>
 
         <p className="text-center text-muted-foreground mt-6">
-          {mode === 'login' ? (
+          {mode === "login" ? (
             <>
-              {t.notyetAccount}{' '}
+              {t.notyetAccount}{" "}
               <Link
                 href="/register"
                 className="text-primary hover:underline font-medium"
@@ -143,7 +143,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             </>
           ) : (
             <>
-              {t.alreayAccount}{' '}
+              {t.alreayAccount}{" "}
               <Link
                 href="/login"
                 className="text-primary hover:underline font-medium"

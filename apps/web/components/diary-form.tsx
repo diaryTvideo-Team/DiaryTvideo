@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import type React from 'react';
+import type React from "react";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { saveEntry } from '@/lib/diary-store';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { useLanguage } from './language-toggle';
-import { translations } from '@/lib/translations';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { saveEntry } from "@/lib/diary-store";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useLanguage } from "./language-toggle";
+import { translations } from "@/lib/translations";
 
 export function DiaryForm() {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { language } = useLanguage();
 
@@ -26,7 +26,7 @@ export function DiaryForm() {
 
     setIsSubmitting(true);
     saveEntry({ title: title.trim(), content: content.trim() });
-    router.push('/diary');
+    router.push("/diary");
   };
 
   return (
@@ -85,7 +85,7 @@ export function DiaryForm() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push('/diary')}
+          onClick={() => router.push("/diary")}
           className="border-border text-foreground hover:bg-secondary"
         >
           {t.cancel}
@@ -95,7 +95,7 @@ export function DiaryForm() {
           disabled={isSubmitting || !title.trim() || !content.trim()}
           className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {isSubmitting ? 'Saving...' : t.saveEntry}
+          {isSubmitting ? "Saving..." : t.saveEntry}
         </Button>
       </div>
     </form>

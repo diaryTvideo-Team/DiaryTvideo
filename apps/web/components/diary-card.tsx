@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { Play, Trash2, Calendar, Eye } from 'lucide-react';
-import type { DiaryEntry } from '@/lib/diary-store';
-import { Language } from '@/lib/translations';
-import { useFormattedDate } from '@/lib/formattedDate';
+import { Play, Trash2, Calendar, Eye } from "lucide-react";
+import type { DiaryEntry } from "@/lib/diary-store";
+import { Language } from "@/lib/translations";
+import { useFormattedDate } from "@/lib/formattedDate";
 
 interface DiaryCardProps {
   entry: DiaryEntry;
-  view: 'video' | 'text';
+  view: "video" | "text";
   onDelete: (id: string) => void;
   onView: (entry: DiaryEntry) => void;
   language: Language;
@@ -22,7 +22,7 @@ export function DiaryCard({
 }: DiaryCardProps) {
   const formattedDate = useFormattedDate({ entry, language });
 
-  if (view === 'video') {
+  if (view === "video") {
     return (
       <div className="group relative overflow-hidden rounded-lg bg-card shadow-sm transition-shadow hover:shadow-md">
         <button
@@ -35,7 +35,7 @@ export function DiaryCard({
             </div>
           </div>
           <div className="absolute bottom-2 right-2 rounded bg-foreground/80 px-2 py-0.5 text-xs text-background">
-            {language === 'ko' ? 'AI 생성됨' : 'AI Generated'}
+            {language === "ko" ? "AI 생성됨" : "AI Generated"}
           </div>
         </button>
         <div className="p-4">
@@ -108,7 +108,7 @@ export function DiaryCard({
         onClick={() => onView(entry)}
         className="mt-3 text-sm text-primary hover:underline"
       >
-        {language === 'ko' ? '더보기' : 'Read more'}
+        {language === "ko" ? "더보기" : "Read more"}
       </button>
     </div>
   );

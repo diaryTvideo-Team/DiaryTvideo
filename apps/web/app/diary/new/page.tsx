@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { DiaryForm } from '@/components/diary-form';
-import { useAuth } from '@/components/auth-provider';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { BookOpen } from 'lucide-react';
-import { COOMON_TRANSLATIONS } from '@/lib/translations';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { DiaryForm } from "@/components/diary-form";
+import { useAuth } from "@/components/auth-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { BookOpen } from "lucide-react";
+import { COOMON_TRANSLATIONS } from "@/lib/translations";
 
 export default function NewEntryPage() {
   const { user, isLoading } = useAuth();
@@ -15,7 +15,7 @@ export default function NewEntryPage() {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, isLoading, router]);
 

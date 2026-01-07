@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import type React from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { BookOpen, PenLine, Lock, Sparkles } from 'lucide-react';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { LanguageToggle, useLanguage } from '@/components/language-toggle';
-import { translations } from '@/lib/translations';
+import type React from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { BookOpen, PenLine, Lock, Sparkles } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle, useLanguage } from "@/components/language-toggle";
+import { translations } from "@/lib/translations";
 
 export default function IntroPage() {
   const { language } = useLanguage();

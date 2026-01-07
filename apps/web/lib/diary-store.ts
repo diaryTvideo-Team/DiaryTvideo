@@ -5,10 +5,10 @@ export interface DiaryEntry {
   createdAt: Date;
 }
 
-const STORAGE_KEY = 'diary-entries';
+const STORAGE_KEY = "diary-entries";
 
 export function getEntries(): DiaryEntry[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return [];
   const entries = JSON.parse(stored);
@@ -19,7 +19,7 @@ export function getEntries(): DiaryEntry[] {
 }
 
 export function saveEntry(
-  entry: Omit<DiaryEntry, 'id' | 'createdAt'>,
+  entry: Omit<DiaryEntry, "id" | "createdAt">,
 ): DiaryEntry {
   const entries = getEntries();
   const newEntry: DiaryEntry = {

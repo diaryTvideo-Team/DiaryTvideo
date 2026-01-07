@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import type React from 'react';
+import type React from "react";
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Languages } from 'lucide-react';
+import { createContext, useContext, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Languages } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
-export type Language = 'en' | 'ko';
+export type Language = "en" | "ko";
 
 const LanguageContext = createContext<{
   language: Language;
@@ -22,26 +22,26 @@ const LanguageContext = createContext<{
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error('useLanguage must be used within LanguageProvider');
+    throw new Error("useLanguage must be used within LanguageProvider");
   }
   return context;
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>("en");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem('language') as Language;
-    if (stored === 'en' || stored === 'ko') {
+    const stored = localStorage.getItem("language") as Language;
+    if (stored === "en" || stored === "ko") {
       setLanguageState(stored);
     }
   }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('language', lang);
+    localStorage.setItem("language", lang);
   };
 
   if (!mounted) {
@@ -72,14 +72,14 @@ export function LanguageToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onClick={() => setLanguage('en')}
-          className={language === 'en' ? 'bg-secondary' : ''}
+          onClick={() => setLanguage("en")}
+          className={language === "en" ? "bg-secondary" : ""}
         >
           English
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setLanguage('ko')}
-          className={language === 'ko' ? 'bg-secondary' : ''}
+          onClick={() => setLanguage("ko")}
+          className={language === "ko" ? "bg-secondary" : ""}
         >
           한국어
         </DropdownMenuItem>

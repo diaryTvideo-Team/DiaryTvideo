@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useLanguage } from '@/components/language-toggle';
-import { translations } from '@/lib/translations';
+import { useLanguage } from "@/components/language-toggle";
+import { translations } from "@/lib/translations";
 
 export function Footer() {
   const { language } = useLanguage();
@@ -17,7 +17,7 @@ export function Footer() {
 
           <div className="text-center text-sm text-muted-foreground md:text-right">
             <p>
-              {t.developedBy} v0 Team • {t.contact}:{' '}
+              {t.developedBy} v0 Team • {t.contact}:{" "}
               <a
                 href="mailto:developer@mydiary.com"
                 className="text-foreground underline-offset-4 hover:underline"

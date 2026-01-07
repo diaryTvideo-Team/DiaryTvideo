@@ -1,8 +1,8 @@
-import { AuthForm } from '@/components/auth-form';
-import { BookOpen } from 'lucide-react';
-import Link from 'next/link';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { COOMON_TRANSLATIONS } from '@/lib/translations';
+import { AuthForm } from "@/components/auth-form";
+import { BookOpen } from "lucide-react";
+import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { COOMON_TRANSLATIONS } from "@/lib/translations";
 
 export default function RegisterPage() {
   return (
