@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DiaryList } from "@/components/diary-list";
 import { Button } from "@/components/ui/button";
-import { PenLine, LogOut, BookOpen } from "lucide-react";
+import { PenLine, LogOut, BookOpen, UserCircle } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle, useLanguage } from "@/components/language-toggle";
@@ -63,6 +63,11 @@ export default function DiaryPage() {
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <ThemeToggle />
+            <Link href="/diary/account">
+              <Button variant="ghost" size="icon" title={t.account}>
+                <UserCircle className="h-5 w-5" />
+              </Button>
+            </Link>
             <Link href="/diary/new">
               <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
                 <PenLine className="h-4 w-4" />

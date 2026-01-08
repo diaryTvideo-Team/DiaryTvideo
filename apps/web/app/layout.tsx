@@ -8,7 +8,7 @@ import { Footer } from "@/components/footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "My Diary",
+  title: "DiaryTvideo",
   description: "Your personal space for thoughts and memories",
   generator: "v0.app",
   icons: {
