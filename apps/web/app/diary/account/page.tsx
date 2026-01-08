@@ -38,6 +38,7 @@ export default function AccountPage() {
   const [newName, setNewName] = useState("");
   const [nameSuccess, setNameSuccess] = useState(false);
   const [nameError, setNameError] = useState("");
+  const [isUpdatingName, setIsUpdatingName] = useState(false);
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState("");
@@ -45,11 +46,13 @@ export default function AccountPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   // Delete account state
   const [deletePassword, setDeletePassword] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -66,6 +69,7 @@ export default function AccountPage() {
 
     if (!user || !newName.trim()) return;
 
+    setIsUpdatingName(true);
     const result = updateName(user.id, newName.trim());
     if (result.success) {
       setNameSuccess(true);
@@ -75,6 +79,7 @@ export default function AccountPage() {
     } else {
       setNameError(result.error || "Failed to update name");
     }
+    setIsUpdatingName(false);
   };
 
   const handlePasswordChange = (e: React.FormEvent) => {
@@ -89,6 +94,7 @@ export default function AccountPage() {
       return;
     }
 
+    setIsUpdatingPassword(true);
     const result = updatePassword(user.id, currentPassword, newPasswordValue);
     if (result.success) {
       setPasswordSuccess(true);
@@ -99,6 +105,7 @@ export default function AccountPage() {
     } else {
       setPasswordError(result.error || "Failed to update password");
     }
+    setIsUpdatingPassword(false);
   };
 
   const handleDeleteAccount = (e: React.FormEvent) => {
@@ -107,12 +114,14 @@ export default function AccountPage() {
 
     if (!user) return;
 
+    setIsDeletingAccount(true);
     const result = deleteAccount(user.id, deletePassword);
     if (result.success) {
       logout();
       router.push("/");
     } else {
       setDeleteError(result.error || "Failed to delete account");
+      setIsDeletingAccount(false);
     }
   };
 
@@ -215,7 +224,16 @@ export default function AccountPage() {
                     {t.nameUpdated}
                   </p>
                 )}
-                <Button type="submit">{t.updateName}</Button>
+                <Button
+                  type="submit"
+                  disabled={isUpdatingName}
+                  className="flex items-center gap-2"
+                >
+                  {isUpdatingName && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  )}
+                  {isUpdatingName ? "Updating..." : t.updateName}
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -271,7 +289,16 @@ export default function AccountPage() {
                     {t.passwordUpdated}
                   </p>
                 )}
-                <Button type="submit">{t.updatePassword}</Button>
+                <Button
+                  type="submit"
+                  disabled={isUpdatingPassword}
+                  className="flex items-center gap-2"
+                >
+                  {isUpdatingPassword && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  )}
+                  {isUpdatingPassword ? "Updating..." : t.updatePassword}
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -320,6 +347,7 @@ export default function AccountPage() {
                     <Button
                       type="button"
                       variant="outline"
+                      disabled={isDeletingAccount}
                       onClick={() => {
                         setShowDeleteConfirm(false);
                         setDeletePassword("");
@@ -328,8 +356,16 @@ export default function AccountPage() {
                     >
                       {t.cancel}
                     </Button>
-                    <Button type="submit" variant="destructive">
-                      {t.deleteAccount}
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      disabled={isDeletingAccount}
+                      className="flex items-center gap-2"
+                    >
+                      {isDeletingAccount && (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      )}
+                      {isDeletingAccount ? "Deleting..." : t.deleteAccount}
                     </Button>
                   </div>
                 </form>

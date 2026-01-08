@@ -33,6 +33,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [verificationCode, setVerificationCode] = useState<string[]>([
     "",
     "",
@@ -139,13 +140,21 @@ export function AuthForm({ mode }: AuthFormProps) {
     }
   };
 
-  const handleResendCode = () => {
+  const handleResendCode = async () => {
+    setIsResending(true);
     resendVerificationCode(email);
     setError("");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsResending(false);
+    alert(t.verificationCodeResent);
   };
 
-  const handleResendPasswordResetEmail = () => {
+  const handleResendPasswordResetEmail = async () => {
+    setIsResending(true);
     resendPasswordResetEmail(email);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsResending(false);
+    alert(t.passwordResetEmailResent);
   };
 
   const isVerificationComplete = verificationCode.every(
@@ -171,9 +180,10 @@ export function AuthForm({ mode }: AuthFormProps) {
             <button
               type="button"
               onClick={handleResendPasswordResetEmail}
-              className="text-primary hover:underline font-medium"
+              disabled={isResending}
+              className="text-primary hover:underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t.resendEmail}
+              {isResending ? "Please wait..." : t.resendEmail}
             </button>
           </p>
         </div>
@@ -241,9 +251,10 @@ export function AuthForm({ mode }: AuthFormProps) {
             <button
               type="button"
               onClick={handleResendCode}
-              className="text-primary hover:underline font-medium"
+              disabled={isResending}
+              className="text-primary hover:underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t.resendCode}
+              {isResending ? "Please wait..." : t.resendCode}
             </button>
           </p>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { X, AlertTriangle } from "lucide-react";
 
 interface DeleteModalProps {
@@ -22,6 +22,8 @@ export function DeleteModal({
   cancelText,
   confirmText,
 }: DeleteModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -77,17 +79,24 @@ export function DeleteModal({
         <div className="flex items-center justify-end gap-3 border-t border-border bg-secondary/30 px-6 py-4">
           <button
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            disabled={isLoading}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {cancelText}
           </button>
           <button
             onClick={() => {
+              setIsLoading(true);
               onConfirm();
+              setIsLoading(false);
               onClose();
             }}
-            className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-destructive/90"
+            disabled={isLoading}
+            className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
+            {isLoading && (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            )}
             {confirmText}
           </button>
         </div>

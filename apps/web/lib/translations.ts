@@ -65,6 +65,8 @@ export const translations = {
     checkEmailForReset: "Check your email to reset your password.",
     didntReceiveEmail: "Didn't receive the email?",
     resendEmail: "Resend email",
+    verificationCodeResent: "Verification code has been resent!",
+    passwordResetEmailResent: "Password reset email has been resent!",
 
     // Diary Page
     newEntryTitle: "Title",
@@ -171,6 +173,8 @@ export const translations = {
     checkEmailForReset: "이메일을 확인하여 비밀번호를 재설정하세요.",
     didntReceiveEmail: "이메일을 받지 못하셨나요?",
     resendEmail: "이메일 재전송",
+    verificationCodeResent: "인증 코드가 재전송되었습니다!",
+    passwordResetEmailResent: "비밀번호 재설정 이메일이 재전송되었습니다!",
 
     // Diary Page
     newEntryTitle: "제목",
