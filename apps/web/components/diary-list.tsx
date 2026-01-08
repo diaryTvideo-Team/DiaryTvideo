@@ -6,6 +6,7 @@ import { ViewToggle } from "./view-toggle";
 import { DiaryFilter } from "./diary-filter";
 import { DiaryCalendar } from "./diary-calendar";
 import { DiaryModal } from "./diary-modal";
+import { DeleteModal } from "./delete-modal";
 import { getEntries, deleteEntry, type DiaryEntry } from "@/lib/diary-store";
 import { BookOpen } from "lucide-react";
 import { translations, type Language } from "@/lib/translations";
@@ -17,6 +18,8 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
 
   const t = translations[language];
 
@@ -26,8 +29,16 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
   }, []);
 
   const handleDelete = (id: string) => {
-    deleteEntry(id);
-    setEntries(getEntries());
+    setEntryToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (entryToDelete) {
+      deleteEntry(entryToDelete);
+      setEntries(getEntries());
+      setEntryToDelete(null);
+    }
   };
 
   const handleView = (entry: DiaryEntry) => {
@@ -156,6 +167,20 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
         entry={selectedEntry}
         onClose={() => setSelectedEntry(null)}
         language={language}
+      />
+
+      {/* Delete confirmation modal */}
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setEntryToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title={t.deleteEntryTitle}
+        message={t.deleteEntryMessage}
+        cancelText={t.cancel}
+        confirmText={t.deleteConfirm}
       />
     </>
   );
