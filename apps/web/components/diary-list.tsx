@@ -167,6 +167,7 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
         entry={selectedEntry}
         onClose={() => setSelectedEntry(null)}
         language={language}
+        view={view}
       />
 
       {/* Delete confirmation modal */}

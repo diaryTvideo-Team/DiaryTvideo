@@ -3,6 +3,9 @@ export interface DiaryEntry {
   title: string;
   content: string;
   createdAt: Date;
+  videoUrl?: string;
+  thumbnailUrl?: string;
+  subtitleUrl?: string;
 }
 
 const STORAGE_KEY = "diary-entries";

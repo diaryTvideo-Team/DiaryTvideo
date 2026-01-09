@@ -1,18 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { X, Calendar } from "lucide-react";
 import type { DiaryEntry } from "@/lib/diary-store";
 import { Language } from "@/lib/translations";
 import { useFormattedDate } from "@/lib/formattedDate";
+import { VideoPlayer } from "./video-player";
+import { DUMMY_VIDEO } from "@/lib/dummy-video";
 
 interface DiaryModalProps {
   entry: DiaryEntry | null;
   onClose: () => void;
   language: Language;
+  view: "video" | "text";
 }
 
-export function DiaryModal({ entry, onClose, language }: DiaryModalProps) {
+export function DiaryModal({
+  entry,
+  onClose,
+  language,
+  view,
+}: DiaryModalProps) {
+  const [showFullContent, setShowFullContent] = useState(false);
   const formattedDate = useFormattedDate({ entry, language });
 
   useEffect(() => {
@@ -62,12 +71,50 @@ export function DiaryModal({ entry, onClose, language }: DiaryModalProps) {
           className="overflow-y-auto p-6"
           style={{ maxHeight: "calc(85vh - 73px)" }}
         >
+          {/* Video Player */}
+          {view === "video" && (entry.videoUrl || DUMMY_VIDEO.videoUrl) && (
+            <div className="mb-6">
+              <VideoPlayer
+                videoUrl={entry.videoUrl || DUMMY_VIDEO.videoUrl}
+                thumbnailUrl={entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl}
+                subtitleUrl={entry.subtitleUrl || DUMMY_VIDEO.subtitleUrl}
+                language={language}
+              />
+            </div>
+          )}
+
           <h2 className="font-serif text-2xl font-semibold text-foreground">
             {entry.title}
           </h2>
-          <div className="mt-6 text-foreground/80 leading-relaxed whitespace-pre-wrap">
-            {entry.content}
-          </div>
+          {view === "video" ? (
+            <>
+              {showFullContent ? (
+                <div className="mt-6 text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                  {entry.content}
+                </div>
+              ) : (
+                <div className="mt-6 text-foreground/80 leading-relaxed whitespace-pre-wrap line-clamp-4">
+                  {entry.content}
+                </div>
+              )}
+              <button
+                onClick={() => setShowFullContent(!showFullContent)}
+                className="mt-3 text-sm text-primary hover:underline"
+              >
+                {showFullContent
+                  ? language === "ko"
+                    ? "내용 숨기기"
+                    : "Hide content"
+                  : language === "ko"
+                    ? "내용 더보기"
+                    : "Show more"}
+              </button>
+            </>
+          ) : (
+            <div className="mt-6 text-foreground/80 leading-relaxed whitespace-pre-wrap">
+              {entry.content}
+            </div>
+          )}
         </div>
       </div>
     </div>

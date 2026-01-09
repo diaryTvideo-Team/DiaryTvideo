@@ -25,7 +25,10 @@ export function DiaryForm() {
     if (!title.trim() || !content.trim()) return;
 
     setIsSubmitting(true);
-    saveEntry({ title: title.trim(), content: content.trim() });
+    saveEntry({
+      title: title.trim(),
+      content: content.trim(),
+    });
     router.push("/diary");
   };
 
