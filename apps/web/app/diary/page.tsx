@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DiaryList } from "@/components/diary-list";
@@ -15,12 +14,6 @@ export default function DiaryPage() {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const { language } = useLanguage();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, isLoading, router]);
 
   const handleLogout = () => {
     logout();

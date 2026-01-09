@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { DiaryForm } from "@/components/diary-form";
 import { useAuth } from "@/components/auth-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -11,13 +9,6 @@ import { COOMON_TRANSLATIONS } from "@/lib/translations";
 
 export default function NewEntryPage() {
   const { user, isLoading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, isLoading, router]);
 
   if (isLoading) {
     return (
