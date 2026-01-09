@@ -1,12 +1,4 @@
-export interface DiaryEntry {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: Date;
-  videoUrl?: string;
-  thumbnailUrl?: string;
-  subtitleUrl?: string;
-}
+import { DiaryEntry } from "@repo/types";
 
 // TODO: Replace with actual API call to GET /api/diary
 export function getEntries(): DiaryEntry[] {

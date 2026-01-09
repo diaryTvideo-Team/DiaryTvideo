@@ -1,11 +1,6 @@
 "use client";
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  createdAt: string;
-}
+import { User } from "@repo/types";
 
 // TODO: Replace with actual API call to POST /api/auth/register
 export function register(): { success: boolean; error?: string } {

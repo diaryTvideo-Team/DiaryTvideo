@@ -7,7 +7,8 @@ import { DiaryFilter } from "./diary-filter";
 import { DiaryCalendar } from "./diary-calendar";
 import { DiaryModal } from "./diary-modal";
 import { DeleteModal } from "./delete-modal";
-import { getEntries, deleteEntry, type DiaryEntry } from "@/lib/diary-store";
+import { getEntries, deleteEntry } from "@/lib/diary-store";
+import { DiaryEntry } from "@repo/types";
 import { BookOpen } from "lucide-react";
 import { translations, type Language } from "@/lib/translations";
 
@@ -35,7 +36,7 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
 
   const confirmDelete = () => {
     if (entryToDelete) {
-      deleteEntry(entryToDelete);
+      deleteEntry();
       setEntries(getEntries());
       setEntryToDelete(null);
     }

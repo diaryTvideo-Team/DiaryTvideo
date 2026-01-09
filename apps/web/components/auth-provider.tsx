@@ -7,11 +7,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  getCurrentUser,
-  logout as authLogout,
-  type User,
-} from "@/lib/auth-store";
+import { getCurrentUser, logout as authLogout } from "@/lib/auth-store";
+import { User } from "@repo/types";
 
 interface AuthContextType {
   user: User | null;

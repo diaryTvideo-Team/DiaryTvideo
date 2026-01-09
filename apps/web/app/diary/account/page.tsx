@@ -64,7 +64,7 @@ export default function AccountPage() {
     if (!user || !newName.trim()) return;
 
     setIsUpdatingName(true);
-    const result = updateName(user.id, newName.trim());
+    const result = updateName();
     if (result.success) {
       setNameSuccess(true);
       setNewName("");
@@ -89,7 +89,7 @@ export default function AccountPage() {
     }
 
     setIsUpdatingPassword(true);
-    const result = updatePassword(user.id, currentPassword, newPasswordValue);
+    const result = updatePassword();
     if (result.success) {
       setPasswordSuccess(true);
       setCurrentPassword("");
@@ -109,7 +109,7 @@ export default function AccountPage() {
     if (!user) return;
 
     setIsDeletingAccount(true);
-    const result = deleteAccount(user.id, deletePassword);
+    const result = deleteAccount();
     if (result.success) {
       logout();
       router.push("/");
@@ -138,7 +138,7 @@ export default function AccountPage() {
           year: "numeric",
           month: "long",
           day: "numeric",
-        },
+        }
       )
     : "-";
 

@@ -6,6 +6,7 @@
     "lint": "turbo run lint",
     "format": "turbo run format",
     "format:check": "prettier --check .",
+    "type-check": "turbo run type-check",
     "test": "turbo run test",
     "prepare": "husky"
   },

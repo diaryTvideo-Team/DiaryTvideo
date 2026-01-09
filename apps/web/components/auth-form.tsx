@@ -63,8 +63,8 @@ export function AuthForm({ mode }: AuthFormProps) {
     setIsLoading(true);
 
     if (mode === "verify") {
-      const code = verificationCode.join("");
-      const result = verifyCode(email, code);
+      // const code = verificationCode.join("");
+      const result = verifyCode();
       if (result.success) {
         // Log user in after successful verification
         const users = localStorage.getItem("diary_users");
@@ -72,7 +72,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           const parsedUsers = JSON.parse(users);
           const user = parsedUsers.find(
             (u: { email: string }) =>
-              u.email.toLowerCase() === email.toLowerCase(),
+              u.email.toLowerCase() === email.toLowerCase()
           );
           if (user) {
             const publicUser = {
@@ -83,7 +83,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             };
             localStorage.setItem(
               "diary_current_user",
-              JSON.stringify(publicUser),
+              JSON.stringify(publicUser)
             );
             refreshUser();
             router.push("/diary");
@@ -93,17 +93,17 @@ export function AuthForm({ mode }: AuthFormProps) {
         setError(result.error || "Verification failed");
       }
     } else if (mode === "register") {
-      const result = register(email, password, name);
+      const result = register();
       if (result.success) {
         // Send verification code
-        sendVerificationCode(email);
+        sendVerificationCode();
         // Redirect to verification page
         router.push(`/verify?email=${encodeURIComponent(email)}`);
       } else {
         setError(result.error || "Registration failed");
       }
     } else {
-      const result = login(email, password);
+      const result = login();
       if (result.success) {
         refreshUser();
         router.push("/diary");
@@ -132,7 +132,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const handleVerificationCodeKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
+    e: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (e.key === "Backspace" && !verificationCode[index] && index > 0) {
       // Move to previous input on backspace if current is empty
@@ -142,7 +142,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const handleResendCode = async () => {
     setIsResending(true);
-    resendVerificationCode(email);
+    resendVerificationCode();
     setError("");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsResending(false);
@@ -151,14 +151,14 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const handleResendPasswordResetEmail = async () => {
     setIsResending(true);
-    resendPasswordResetEmail(email);
+    resendPasswordResetEmail();
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsResending(false);
     alert(t.passwordResetEmailResent);
   };
 
   const isVerificationComplete = verificationCode.every(
-    (digit) => digit !== "",
+    (digit) => digit !== ""
   );
 
   if (mode === "forgot-password") {

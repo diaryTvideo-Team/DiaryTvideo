@@ -1,10 +1,10 @@
 "use client";
 
 import { Play, Trash2, Calendar, Eye } from "lucide-react";
-import type { DiaryEntry } from "@/lib/diary-store";
 import { Language } from "@/lib/translations";
 import { useFormattedDate } from "@/lib/formattedDate";
 import { DUMMY_VIDEO } from "@/lib/dummy-video";
+import { DiaryEntry } from "@repo/types";
 
 interface DiaryCardProps {
   entry: DiaryEntry;

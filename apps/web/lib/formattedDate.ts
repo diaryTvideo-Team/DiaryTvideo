@@ -1,4 +1,4 @@
-import { DiaryEntry } from "./diary-store";
+import { DiaryEntry } from "@repo/types";
 import { Language } from "./translations";
 
 interface FormattedDateProps {
