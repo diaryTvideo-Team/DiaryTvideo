@@ -8,35 +8,25 @@ export interface DiaryEntry {
   subtitleUrl?: string;
 }
 
-const STORAGE_KEY = "diary-entries";
-
+// TODO: Replace with actual API call to GET /api/diary
 export function getEntries(): DiaryEntry[] {
-  if (typeof window === "undefined") return [];
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return [];
-  const entries = JSON.parse(stored);
-  return entries.map((entry: DiaryEntry) => ({
-    ...entry,
-    createdAt: new Date(entry.createdAt),
-  }));
+  console.warn("getEntries: API not implemented yet");
+  return [];
 }
 
-export function saveEntry(
-  entry: Omit<DiaryEntry, "id" | "createdAt">,
-): DiaryEntry {
-  const entries = getEntries();
-  const newEntry: DiaryEntry = {
-    ...entry,
-    id: crypto.randomUUID(),
+// TODO: Replace with actual API call to POST /api/diary
+export function saveEntry(): DiaryEntry {
+  console.warn("saveEntry: API not implemented yet");
+  // Return a mock entry to maintain type compatibility
+  return {
+    id: "",
+    title: "",
+    content: "",
     createdAt: new Date(),
   };
-  entries.unshift(newEntry);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  return newEntry;
 }
 
-export function deleteEntry(id: string): void {
-  const entries = getEntries();
-  const filtered = entries.filter((e) => e.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+// TODO: Replace with actual API call to DELETE /api/diary/:id
+export function deleteEntry(): void {
+  console.warn("deleteEntry: API not implemented yet");
 }
