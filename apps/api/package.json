@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" --ignore-path ../../.prettierignore",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" --ignore-path ../../.prettierignore",
     "start": "nest start",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
