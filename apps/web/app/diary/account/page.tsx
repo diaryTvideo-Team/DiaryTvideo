@@ -138,7 +138,7 @@ export default function AccountPage() {
           year: "numeric",
           month: "long",
           day: "numeric",
-        }
+        },
       )
     : "-";
 
