@@ -10,7 +10,12 @@ export const SignupRequestSchema = z.object({
 
 export const LoginRequestSchema = z.object({
   email: EmailSchema,
-  password: PasswordSchema,
+  password: z.string(),
+});
+
+export const VerifyEmailRequestSchema = z.object({
+  email: EmailSchema,
+  code: z.string(),
 });
 
 // 응답 스키마
@@ -43,6 +48,7 @@ export const JwtRefreshPayloadSchema = z.object({
 
 export type SignupRequest = z.infer<typeof SignupRequestSchema>;
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
+export type VerifyEmailRequest = z.infer<typeof VerifyEmailRequestSchema>;
 export type AuthTokens = z.infer<typeof AuthTokensSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 export type JwtAccessPayload = z.infer<typeof JwtAccessPayloadSchema>;

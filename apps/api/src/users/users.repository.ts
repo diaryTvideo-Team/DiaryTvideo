@@ -35,16 +35,6 @@ export class UsersRepository {
     });
   }
 
-  // 인증 코드로 유저 찾기
-  async findByVerificationCode(code: string): Promise<User | null> {
-    return this.prisma.user.findFirst({
-      where: {
-        emailVerificationToken: code,
-        deletedAt: null,
-      },
-    });
-  }
-
   // 이메일 인증 처리
   async markEmailAsVerified(userId: number): Promise<User> {
     return this.prisma.user.update({

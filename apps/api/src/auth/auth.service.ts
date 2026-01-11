@@ -2,13 +2,19 @@ import {
   Injectable,
   ConflictException,
   BadRequestException,
+  NotFoundException,
 } from "@nestjs/common";
 import { UsersRepository } from "../users/users.repository";
 import { PasswordService } from "./password.service";
 import { TokenService } from "./token.service";
 import { EmailService } from "./email.service";
 import { VerificationCodeService } from "./verification-code.service";
-import { SignupRequest, AuthResponse } from "@repo/types";
+import {
+  SignupRequest,
+  AuthResponse,
+  LoginRequest,
+  VerifyEmailRequest,
+} from "@repo/types";
 
 @Injectable()
 export class AuthService {
@@ -51,13 +57,20 @@ export class AuthService {
     };
   }
 
-  async verifyEmail(code: string): Promise<AuthResponse> {
-    if (!code || code.trim() === "") {
-      throw new BadRequestException("Verification code must not be empty");
-    }
-    const user = await this.usersRepository.findByVerificationCode(code);
+  async verifyEmail(data: VerifyEmailRequest): Promise<AuthResponse> {
+    const user = await this.usersRepository.findByEmail(data.email as string);
 
     if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    console.log(user.emailVerificationTokenExpiresAt);
+
+    if (user.emailVerified) {
+      throw new BadRequestException("Email already verified");
+    }
+
+    if (user.emailVerificationToken !== data.code) {
       throw new BadRequestException("Invalid verification code");
     }
 
@@ -99,7 +112,7 @@ export class AuthService {
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException("User not found");
+      throw new NotFoundException("User not found");
     }
 
     if (user.emailVerified) {
@@ -124,6 +137,48 @@ export class AuthService {
 
     return {
       message: "Verification email sent. Please check your inbox.",
+    };
+  }
+
+  async signin(data: LoginRequest): Promise<AuthResponse> {
+    const user = await this.usersRepository.findByEmail(data.email);
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    const isPasswordValid = await this.passwordService.comparePassword(
+      data.password,
+      user.passwordHash
+    );
+
+    if (!isPasswordValid) {
+      console.log("Invalid password");
+      throw new BadRequestException("Invalid password");
+    }
+
+    const tokens = this.tokenService.generateTokenPair(user.id, user.email);
+
+    const hashedRefreshToken = await this.passwordService.hashPassword(
+      tokens.refreshToken
+    );
+    const refreshTokenExpiration =
+      this.tokenService.calculateRefreshTokenExpiration();
+
+    await this.usersRepository.updateRefreshToken(
+      user.id,
+      hashedRefreshToken,
+      refreshTokenExpiration
+    );
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        emailVerified: true,
+      },
+      tokens,
     };
   }
 }

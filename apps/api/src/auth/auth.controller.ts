@@ -1,6 +1,12 @@
-import { Controller, Post, Body, Query, Get, UsePipes } from "@nestjs/common";
+import { Controller, Post, Body, Get, UsePipes } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { SignupRequest, SignupRequestSchema } from "@repo/types";
+import {
+  LoginRequest,
+  LoginRequestSchema,
+  SignupRequest,
+  SignupRequestSchema,
+  VerifyEmailRequest,
+} from "@repo/types";
 import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
 
 @Controller("auth")
@@ -14,12 +20,18 @@ export class AuthController {
   }
 
   @Get("verify-email")
-  async verifyEmail(@Query("code") code: string) {
-    return this.authService.verifyEmail(code);
+  async verifyEmail(@Body() data: VerifyEmailRequest) {
+    return this.authService.verifyEmail(data);
   }
 
   @Post("resend-verification")
   async resendVerification(@Body("email") email: string) {
     return this.authService.resendVerificationEmail(email);
+  }
+
+  @Post("signin")
+  @UsePipes(new ZodValidationPipe(LoginRequestSchema))
+  async signin(@Body() data: LoginRequest) {
+    return this.authService.signin(data);
   }
 }
