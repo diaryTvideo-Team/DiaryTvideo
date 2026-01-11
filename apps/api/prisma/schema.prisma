@@ -14,13 +14,22 @@ model User {
   email         String    @unique
   name          String
   passwordHash  String    @map("password_hash")
-  emailVerified Boolean   @default(false) @map("email_verified")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
   deletedAt     DateTime? @map("deleted_at")
 
+  refreshToken           String?   @map("refresh_token")
+  refreshTokenExpiresAt  DateTime? @map("refresh_token_expires_at")
+
+  emailVerified Boolean   @default(false) @map("email_verified")
+  emailVerificationToken           String?   @map("email_verification_token")
+  emailVerificationTokenExpiresAt  DateTime? @map("email_verification_token_expires_at")
+
   diaryEntries         DiaryEntry[]
 
+  @@index([email])
+  @@index([refreshToken])
+  @@index([emailVerificationToken])
   @@map("users")
 }
 
