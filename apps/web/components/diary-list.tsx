@@ -8,9 +8,9 @@ import { DiaryCalendar } from "./diary-calendar";
 import { DiaryModal } from "./diary-modal";
 import { DeleteModal } from "./delete-modal";
 import { getEntries, deleteEntry } from "@/lib/diary-store";
-import { DiaryEntry } from "@repo/types";
+import { DiaryEntry, Language } from "@repo/types";
 import { BookOpen } from "lucide-react";
-import { translations, type Language } from "@/lib/translations";
+import { translations } from "@/lib/translations";
 
 export function DiaryList({ language = "en" }: { language?: Language }) {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);

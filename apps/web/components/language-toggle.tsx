@@ -11,8 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-export type Language = "en" | "ko";
+import { Language } from "@repo/types";
 
 const LanguageContext = createContext<{
   language: Language;

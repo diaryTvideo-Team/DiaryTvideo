@@ -1,4 +1,4 @@
-export type Language = "en" | "ko";
+import { Language } from "@repo/types";
 
 export const COOMON_TRANSLATIONS = {
   project_name: "DiaryTvideo",
@@ -8,7 +8,7 @@ export const COOMON_TRANSLATIONS = {
   contact: "Contact",
 };
 
-export const translations = {
+export const translations: { [key in Language]: { [key: string]: string } } = {
   en: {
     // Navigation
     project_name: COOMON_TRANSLATIONS.project_name,

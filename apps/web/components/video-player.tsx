@@ -1,6 +1,6 @@
 "use client";
 
-import { Language } from "@/lib/translations";
+import { Language } from "@repo/types";
 
 interface VideoPlayerProps {
   videoUrl: string;

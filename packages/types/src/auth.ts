@@ -13,14 +13,6 @@ export const LoginRequestSchema = z.object({
   password: PasswordSchema,
 });
 
-export const RefreshTokenRequestSchema = z.object({
-  refreshToken: z.string().min(1, "리프레시 토큰은 필수입니다"),
-});
-
-export const VerifyEmailRequestSchema = z.object({
-  token: z.string().min(1, "인증 토큰은 필수입니다"),
-});
-
 // 응답 스키마
 export const AuthTokensSchema = z.object({
   accessToken: z.string(),
@@ -37,10 +29,6 @@ export const AuthResponseSchema = z.object({
   tokens: AuthTokensSchema,
 });
 
-export const MessageResponseSchema = z.object({
-  message: z.string(),
-});
-
 // JWT Payload 스키마
 export const JwtAccessPayloadSchema = z.object({
   sub: z.number(), // user id
@@ -55,10 +43,7 @@ export const JwtRefreshPayloadSchema = z.object({
 
 export type SignupRequest = z.infer<typeof SignupRequestSchema>;
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
-export type RefreshTokenRequest = z.infer<typeof RefreshTokenRequestSchema>;
-export type VerifyEmailRequest = z.infer<typeof VerifyEmailRequestSchema>;
 export type AuthTokens = z.infer<typeof AuthTokensSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
-export type MessageResponse = z.infer<typeof MessageResponseSchema>;
 export type JwtAccessPayload = z.infer<typeof JwtAccessPayloadSchema>;
 export type JwtRefreshPayload = z.infer<typeof JwtRefreshPayloadSchema>;

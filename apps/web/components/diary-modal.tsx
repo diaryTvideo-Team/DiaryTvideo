@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { X, Calendar } from "lucide-react";
-import { Language } from "@/lib/translations";
 import { useFormattedDate } from "@/lib/formattedDate";
 import { VideoPlayer } from "./video-player";
 import { DUMMY_VIDEO } from "@/lib/dummy-video";
-import { DiaryEntry } from "@repo/types";
+import { DiaryEntry, Language } from "@repo/types";
 
 interface DiaryModalProps {
   entry: DiaryEntry | null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Language } from "@/lib/translations";
+import { Language } from "@repo/types";
 import { Video, FileText } from "lucide-react";
 
 interface ViewToggleProps {

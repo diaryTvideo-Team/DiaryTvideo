@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Language } from "@/lib/translations";
+import { Language } from "@repo/types";
 
 interface DiaryCalendarProps {
   entryDates: Date[];
@@ -23,13 +23,13 @@ export function DiaryCalendar({
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth() + 1,
-    0,
+    0
   ).getDate();
 
   const firstDayOfMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth(),
-    1,
+    1
   ).getDay();
 
   const monthNames_en = [
@@ -70,13 +70,13 @@ export function DiaryCalendar({
 
   const prevMonth = () => {
     setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1),
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
     );
   };
 
   const nextMonth = () => {
     setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
     );
   };
 
@@ -85,7 +85,7 @@ export function DiaryCalendar({
       (date) =>
         date.getDate() === day &&
         date.getMonth() === currentMonth.getMonth() &&
-        date.getFullYear() === currentMonth.getFullYear(),
+        date.getFullYear() === currentMonth.getFullYear()
     );
   };
 
@@ -111,7 +111,7 @@ export function DiaryCalendar({
     const clickedDate = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
-      day,
+      day
     );
     if (selectedDate && isSelected(day)) {
       onSelectDate(null);
