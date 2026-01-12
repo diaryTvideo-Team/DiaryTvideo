@@ -76,4 +76,47 @@ export class UsersRepository {
       },
     });
   }
+
+  // 로그인 실패 기록
+  async recordFailedLoginAttempt(userId: number): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        failedLoginAttempts: { increment: 1 },
+        lastFailedLoginAt: new Date(),
+      },
+    });
+  }
+
+  // 계정 잠금
+  async lockAccount(userId: number, lockUntil: Date): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        accountLockedUntil: lockUntil,
+      },
+    });
+  }
+
+  // 로그인 시도 초기화
+  async resetLoginAttempts(userId: number): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        failedLoginAttempts: 0,
+        lastFailedLoginAt: null,
+        accountLockedUntil: null,
+      },
+    });
+  }
+
+  // 로그인 성공 기록
+  async recordSuccessfulLogin(userId: number): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        lastSuccessfulLogin: new Date(),
+      },
+    });
+  }
 }

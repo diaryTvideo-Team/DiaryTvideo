@@ -21,9 +21,14 @@ model User {
   refreshToken           String?   @map("refresh_token")
   refreshTokenExpiresAt  DateTime? @map("refresh_token_expires_at")
 
-  emailVerified Boolean   @default(false) @map("email_verified")
+  emailVerified Boolean            @default(false) @map("email_verified")
   emailVerificationToken           String?   @map("email_verification_token")
   emailVerificationTokenExpiresAt  DateTime? @map("email_verification_token_expires_at")
+
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lastFailedLoginAt   DateTime? @map("last_failed_login_at")
+  accountLockedUntil  DateTime? @map("account_locked_until")
+  lastSuccessfulLogin DateTime? @map("last_successful_login")
 
   diaryEntries         DiaryEntry[]
 

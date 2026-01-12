@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UsePipes } from "@nestjs/common";
+import { Controller, Post, Body, UsePipes } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import {
   LoginRequest,
@@ -6,6 +6,7 @@ import {
   SignupRequest,
   SignupRequestSchema,
   VerifyEmailRequest,
+  VerifyEmailRequestSchema,
 } from "@repo/types";
 import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
 
@@ -19,7 +20,8 @@ export class AuthController {
     return this.authService.signup(data);
   }
 
-  @Get("verify-email")
+  @Post("verify-email")
+  @UsePipes(new ZodValidationPipe(VerifyEmailRequestSchema))
   async verifyEmail(@Body() data: VerifyEmailRequest) {
     return this.authService.verifyEmail(data);
   }

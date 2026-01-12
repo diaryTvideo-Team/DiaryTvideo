@@ -14,6 +14,7 @@ import {
   AuthResponse,
   LoginRequest,
   VerifyEmailRequest,
+  AuthErrors,
 } from "@repo/types";
 
 @Injectable()
@@ -29,7 +30,7 @@ export class AuthService {
   async signup(data: SignupRequest): Promise<{ message: string }> {
     const existingUser = await this.usersRepository.findByEmail(data.email);
     if (existingUser) {
-      throw new ConflictException("Email already registered");
+      throw new ConflictException(AuthErrors.EMAIL_ALREADY_REGISTERED);
     }
 
     const passwordHash = await this.passwordService.hashPassword(data.password);
@@ -58,24 +59,22 @@ export class AuthService {
   }
 
   async verifyEmail(data: VerifyEmailRequest): Promise<AuthResponse> {
-    const user = await this.usersRepository.findByEmail(data.email as string);
+    const user = await this.usersRepository.findByEmail(data.email);
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException(AuthErrors.USER_NOT_FOUND);
     }
 
-    console.log(user.emailVerificationTokenExpiresAt);
-
     if (user.emailVerified) {
-      throw new BadRequestException("Email already verified");
+      throw new BadRequestException(AuthErrors.EMAIL_ALREADY_VERIFIED);
     }
 
     if (user.emailVerificationToken !== data.code) {
-      throw new BadRequestException("Invalid verification code");
+      throw new BadRequestException(AuthErrors.INVALID_VERIFICATION_CODE);
     }
 
     if (user.emailVerificationTokenExpiresAt! < new Date()) {
-      throw new BadRequestException("Verification code has expired");
+      throw new BadRequestException(AuthErrors.VERIFICATION_CODE_EXPIRED);
     }
 
     await this.usersRepository.markEmailAsVerified(user.id);
@@ -107,16 +106,16 @@ export class AuthService {
 
   async resendVerificationEmail(email: string): Promise<{ message: string }> {
     if (!email || email.trim() === "") {
-      throw new BadRequestException("Email must not be empty");
+      throw new BadRequestException(AuthErrors.EMAIL_REQUIRED);
     }
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException(AuthErrors.USER_NOT_FOUND);
     }
 
     if (user.emailVerified) {
-      throw new BadRequestException("Email already verified");
+      throw new BadRequestException(AuthErrors.EMAIL_ALREADY_VERIFIED);
     }
 
     const verificationCode = this.verificationCodeService.generateCode();
@@ -143,22 +142,48 @@ export class AuthService {
   async signin(data: LoginRequest): Promise<AuthResponse> {
     const user = await this.usersRepository.findByEmail(data.email);
 
-    if (!user) {
-      throw new NotFoundException("User not found");
+    // 계정 잠금 확인
+    if (user?.accountLockedUntil && user.accountLockedUntil > new Date()) {
+      throw new BadRequestException(AuthErrors.ACCOUNT_LOCKED);
     }
 
-    const isPasswordValid = await this.passwordService.comparePassword(
-      data.password,
-      user.passwordHash
-    );
+    // 사용자 존재 및 비밀번호 검증 (통합된 에러 메시지)
+    const isPasswordValid = user
+      ? await this.passwordService.comparePassword(
+          data.password,
+          user.passwordHash
+        )
+      : false;
 
-    if (!isPasswordValid) {
-      console.log("Invalid password");
-      throw new BadRequestException("Invalid password");
+    if (!user || !isPasswordValid) {
+      // 사용자가 존재하면 실패 카운트 증가
+      if (user) {
+        const updatedUser = await this.usersRepository.recordFailedLoginAttempt(
+          user.id
+        );
+
+        // 5회 실패 시 계정 잠금 (15분)
+        if (updatedUser.failedLoginAttempts >= 5) {
+          const lockUntil = new Date();
+          lockUntil.setMinutes(lockUntil.getMinutes() + 15);
+          await this.usersRepository.lockAccount(user.id, lockUntil);
+        }
+      }
+
+      throw new BadRequestException(AuthErrors.INVALID_CREDENTIALS);
     }
 
+    // 이메일 인증 확인
+    if (!user.emailVerified) {
+      throw new BadRequestException(AuthErrors.EMAIL_NOT_VERIFIED);
+    }
+
+    // 로그인 성공 처리
+    await this.usersRepository.resetLoginAttempts(user.id);
+    await this.usersRepository.recordSuccessfulLogin(user.id);
+
+    // 토큰 생성 및 저장
     const tokens = this.tokenService.generateTokenPair(user.id, user.email);
-
     const hashedRefreshToken = await this.passwordService.hashPassword(
       tokens.refreshToken
     );
@@ -176,7 +201,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
-        emailVerified: true,
+        emailVerified: user.emailVerified, // 하드코딩 제거
       },
       tokens,
     };
