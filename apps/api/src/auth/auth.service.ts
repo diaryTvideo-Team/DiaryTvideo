@@ -206,4 +206,12 @@ export class AuthService {
       tokens,
     };
   }
+
+  async logout(userId: number): Promise<{ message: string }> {
+    await this.usersRepository.clearRefreshToken(userId);
+
+    return {
+      message: "Logged out successfully",
+    };
+  }
 }

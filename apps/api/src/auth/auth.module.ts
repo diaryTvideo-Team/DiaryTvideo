@@ -7,9 +7,12 @@ import { TokenService } from "./token.service";
 import { EmailService } from "./email.service";
 import { VerificationCodeService } from "./verification-code.service";
 import { UsersModule } from "../users/users.module";
+import { PassportModule } from "@nestjs/passport";
+import { JwtStrategy } from "./strategies/jwt.strategy";
 
 @Module({
   imports: [
+    PassportModule,
     JwtModule.register({}), // Empty config, we'll provide secrets per-call
     UsersModule,
   ],
@@ -20,6 +23,7 @@ import { UsersModule } from "../users/users.module";
     TokenService,
     EmailService,
     VerificationCodeService,
+    JwtStrategy,
   ],
   exports: [AuthService, TokenService, PasswordService],
 })

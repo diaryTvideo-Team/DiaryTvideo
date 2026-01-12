@@ -119,4 +119,15 @@ export class UsersRepository {
       },
     });
   }
+
+  // Refresh token 무효화 (로그아웃용)
+  async clearRefreshToken(userId: number): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        refreshToken: null,
+        refreshTokenExpiresAt: null,
+      },
+    });
+  }
 }

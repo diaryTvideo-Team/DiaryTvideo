@@ -1,6 +1,7 @@
-import { Controller, Post, Body, UsePipes } from "@nestjs/common";
+import { Controller, Post, Body, UsePipes, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import {
+  JwtAccessPayload,
   LoginRequest,
   LoginRequestSchema,
   SignupRequest,
@@ -9,6 +10,8 @@ import {
   VerifyEmailRequestSchema,
 } from "@repo/types";
 import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { CurrentUser } from "./decorators/current-user.decorator";
 
 @Controller("auth")
 export class AuthController {
@@ -35,5 +38,11 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(LoginRequestSchema))
   async signin(@Body() data: LoginRequest) {
     return this.authService.signin(data);
+  }
+
+  @Post("logout")
+  @UseGuards(JwtAuthGuard)
+  async logout(@CurrentUser() user: JwtAccessPayload) {
+    return this.authService.logout(user.sub);
   }
 }
