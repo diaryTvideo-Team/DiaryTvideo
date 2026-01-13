@@ -77,4 +77,18 @@ export const AuthErrors = {
     en: "Password must contain at least one number",
     ko: "숫자를 최소 1개 포함해야 합니다",
   }),
+
+  // Password Reset Errors
+  INVALID_RESET_TOKEN: i18nMessage({
+    en: "Invalid or expired password reset token",
+    ko: "유효하지 않거나 만료된 비밀번호 재설정 토큰입니다",
+  }),
+  RESET_TOKEN_EXPIRED: i18nMessage({
+    en: "Password reset link has expired. Please request a new one.",
+    ko: "비밀번호 재설정 링크가 만료되었습니다. 새로운 링크를 요청해주세요.",
+  }),
+  RESET_TOKEN_ALREADY_USED: i18nMessage({
+    en: "This password reset link has already been used.",
+    ko: "이미 사용된 비밀번호 재설정 링크입니다.",
+  }),
 } as const;

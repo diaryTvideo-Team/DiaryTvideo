@@ -125,7 +125,6 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     cancelMembership: "Cancel Membership",
     cancelMembershipWarning:
       "This action will permanently delete your account and all your diary entries. This cannot be undone.",
-    confirmPassword: "Confirm Password",
     deleteAccount: "Delete Account",
     accountDeleted: "Account deleted successfully",
     backToDiary: "Back to Diary",
@@ -250,7 +249,6 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     cancelMembership: "회원 탈퇴",
     cancelMembershipWarning:
       "이 작업은 계정과 모든 일기를 영구적으로 삭제합니다. 되돌릴 수 없습니다.",
-    confirmPassword: "비밀번호 확인",
     deleteAccount: "계정 삭제",
     accountDeleted: "계정이 성공적으로 삭제되었습니다",
     backToDiary: "일기장으로 돌아가기",

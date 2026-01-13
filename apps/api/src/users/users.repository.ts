@@ -130,4 +130,41 @@ export class UsersRepository {
       },
     });
   }
+
+  // 비밀번호 리셋 토큰 업데이트
+  async updatePasswordResetToken(
+    userId: number,
+    token: string,
+    expiresAt: Date
+  ): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordResetToken: token,
+        passwordResetTokenExpiresAt: expiresAt,
+      },
+    });
+  }
+
+  // 리셋 토큰으로 유저 찾기
+  async findByPasswordResetToken(token: string): Promise<User | null> {
+    return this.prisma.user.findFirst({
+      where: {
+        passwordResetToken: token,
+        deletedAt: null,
+      },
+    });
+  }
+
+  // 비밀번호 재설정 + 토큰 클리어
+  async resetPassword(userId: number, newPasswordHash: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash: newPasswordHash,
+        passwordResetToken: null,
+        passwordResetTokenExpiresAt: null,
+      },
+    });
+  }
 }

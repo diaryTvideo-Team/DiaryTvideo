@@ -46,6 +46,25 @@ export const JwtRefreshPayloadSchema = z.object({
   type: z.literal("refresh"),
 });
 
+// Password Reset Request Types
+export const ForgotPasswordRequestSchema = z.object({
+  email: EmailSchema,
+});
+
+export const VerifyResetTokenRequestSchema = z.object({
+  token: z.string().min(32),
+});
+
+export const ResetPasswordRequestSchema = z.object({
+  token: z.string().min(32),
+  newPassword: PasswordSchema,
+});
+
+export type VerifyResetTokenRequest = z.infer<
+  typeof VerifyResetTokenRequestSchema
+>;
+export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequestSchema>;
+export type ResetPasswordRequest = z.infer<typeof ResetPasswordRequestSchema>;
 export type SignupRequest = z.infer<typeof SignupRequestSchema>;
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 export type VerifyEmailRequest = z.infer<typeof VerifyEmailRequestSchema>;

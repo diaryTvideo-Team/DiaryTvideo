@@ -30,11 +30,15 @@ model User {
   accountLockedUntil  DateTime? @map("account_locked_until")
   lastSuccessfulLogin DateTime? @map("last_successful_login")
 
+  passwordResetToken           String?   @map("password_reset_token")
+  passwordResetTokenExpiresAt  DateTime? @map("password_reset_token_expires_at")
+
   diaryEntries         DiaryEntry[]
 
   @@index([email])
   @@index([refreshToken])
   @@index([emailVerificationToken])
+  @@index([passwordResetToken])
   @@map("users")
 }
 

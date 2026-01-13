@@ -9,6 +9,7 @@ import { VerificationCodeService } from "./verification-code.service";
 import { UsersModule } from "../users/users.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { ResetTokenService } from "./reset-token.service";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
     TokenService,
     EmailService,
     VerificationCodeService,
+    ResetTokenService,
     JwtStrategy,
   ],
   exports: [AuthService, TokenService, PasswordService],
