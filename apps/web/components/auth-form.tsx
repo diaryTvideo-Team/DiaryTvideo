@@ -14,6 +14,7 @@ import {
   sendVerificationCode,
   verifyCode,
   resendVerificationCode,
+  sendPasswordResetEmail,
   resendPasswordResetEmail,
 } from "@/lib/auth-store";
 import { useAuth } from "@/components/auth-provider";
@@ -45,6 +46,11 @@ export function AuthForm({ mode }: AuthFormProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { language } = useLanguage();
 
+  // Forgot password states
+  const [emailSent, setEmailSent] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+
   const t = translations[language];
 
   // Get email from URL params for verify mode
@@ -56,6 +62,24 @@ export function AuthForm({ mode }: AuthFormProps) {
       }
     }
   }, [mode, searchParams]);
+
+  // Timer for forgot password resend button
+  useEffect(() => {
+    if (mode === "forgot-password" && emailSent && resendTimer > 0) {
+      const interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            setCanResend(true);
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [mode, emailSent, resendTimer]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +96,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           const parsedUsers = JSON.parse(users);
           const user = parsedUsers.find(
             (u: { email: string }) =>
-              u.email.toLowerCase() === email.toLowerCase(),
+              u.email.toLowerCase() === email.toLowerCase()
           );
           if (user) {
             const publicUser = {
@@ -83,7 +107,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             };
             localStorage.setItem(
               "diary_current_user",
-              JSON.stringify(publicUser),
+              JSON.stringify(publicUser)
             );
             refreshUser();
             router.push("/diary");
@@ -132,7 +156,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const handleVerificationCodeKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
+    e: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (e.key === "Backspace" && !verificationCode[index] && index > 0) {
       // Move to previous input on backspace if current is empty
@@ -149,19 +173,98 @@ export function AuthForm({ mode }: AuthFormProps) {
     alert(t.verificationCodeResent);
   };
 
+  const handleSendPasswordResetEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    const result = sendPasswordResetEmail(email);
+    if (result.success) {
+      setEmailSent(true);
+      setResendTimer(60);
+      setCanResend(false);
+    } else {
+      setError(result.error || "Failed to send reset email");
+    }
+
+    setIsLoading(false);
+  };
+
   const handleResendPasswordResetEmail = async () => {
+    if (!canResend) return;
+
     setIsResending(true);
-    resendPasswordResetEmail();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const result = resendPasswordResetEmail(email);
+    if (result.success) {
+      setResendTimer(60);
+      setCanResend(false);
+      alert(t.passwordResetEmailResent);
+    } else {
+      setError(result.error || "Failed to resend reset email");
+    }
     setIsResending(false);
-    alert(t.passwordResetEmailResent);
   };
 
   const isVerificationComplete = verificationCode.every(
-    (digit) => digit !== "",
+    (digit) => digit !== ""
   );
 
   if (mode === "forgot-password") {
+    if (!emailSent) {
+      // State 1: Email Input
+      return (
+        <div className="w-full max-w-md mx-auto">
+          <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+            <h1 className="font-serif text-3xl font-semibold text-foreground text-center mb-2">
+              {t.resetPassword}
+            </h1>
+            <p className="text-muted-foreground text-center mb-8">
+              {t.enterEmailForReset}
+            </p>
+
+            <form onSubmit={handleSendPasswordResetEmail} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="h-12"
+                />
+              </div>
+
+              {error && (
+                <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                  {error}
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                className="w-full h-12 bg-primary hover:bg-primary/90"
+                disabled={isLoading}
+              >
+                {isLoading ? "Please wait..." : t.sendResetLink}
+              </Button>
+            </form>
+
+            <p className="text-center text-muted-foreground mt-6">
+              <Link
+                href="/login"
+                className="text-primary hover:underline font-medium"
+              >
+                {t.goToLogin}
+              </Link>
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // State 2: Email Sent Confirmation
     return (
       <div className="w-full max-w-md mx-auto">
         <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
@@ -169,22 +272,35 @@ export function AuthForm({ mode }: AuthFormProps) {
             {t.resetPassword}
           </h1>
           <p className="text-muted-foreground text-center mb-2">
-            {t.passwordResetEmailSent}
+            {t.passwordResetEmailSentTo}
           </p>
-          <p className="text-muted-foreground text-center mb-6">
-            {t.checkEmailForReset}
-          </p>
+          <p className="text-primary text-center mb-6 font-medium">{email}</p>
+
+          {resendTimer > 0 ? (
+            <p className="text-center text-muted-foreground">
+              {t.resendAvailableIn.replace("{seconds}", resendTimer.toString())}
+            </p>
+          ) : (
+            <p className="text-center text-muted-foreground">
+              {t.didntReceiveEmail}{" "}
+              <button
+                type="button"
+                onClick={handleResendPasswordResetEmail}
+                disabled={isResending || !canResend}
+                className="text-primary hover:underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isResending ? "Please wait..." : t.resendEmail}
+              </button>
+            </p>
+          )}
 
           <p className="text-center text-muted-foreground mt-6">
-            {t.didntReceiveEmail}{" "}
-            <button
-              type="button"
-              onClick={handleResendPasswordResetEmail}
-              disabled={isResending}
-              className="text-primary hover:underline font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            <Link
+              href="/login"
+              className="text-primary hover:underline font-medium"
             >
-              {isResending ? "Please wait..." : t.resendEmail}
-            </button>
+              {t.goToLogin}
+            </Link>
           </p>
         </div>
       </div>

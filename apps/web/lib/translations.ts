@@ -60,13 +60,30 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     // Password Reset Page
     forgotPassword: "Forgot your password?",
     resetPassword: "Reset Password",
-    passwordResetEmailSent:
-      "A password reset link has been sent to your email.",
-    checkEmailForReset: "Check your email to reset your password.",
+    enterEmailForReset:
+      "Enter your email address to receive a password reset link",
+    sendResetLink: "Send Reset Link",
+    passwordResetEmailSentTo: "Password reset link has been sent to:",
+    resendAvailableIn: "You can resend in {seconds} seconds",
     didntReceiveEmail: "Didn't receive the email?",
     resendEmail: "Resend email",
     verificationCodeResent: "Verification code has been resent!",
     passwordResetEmailResent: "Password reset email has been resent!",
+    enterNewPassword: "Enter your new password",
+    confirmPassword: "Confirm Password",
+    resetPasswordButton: "Reset Password",
+    goToLogin: "Go to Login",
+
+    // Password Reset Errors
+    invalidAccess: "Invalid Access",
+    invalidAccessDesc: "This page requires a valid reset token",
+    linkExpired: "Link Expired",
+    linkExpiredDesc: "This reset link has expired",
+    invalidLink: "Invalid Link",
+    invalidLinkDesc: "This reset link is invalid",
+    linkAlreadyUsed: "Link Already Used",
+    linkAlreadyUsedDesc: "This reset link has already been used",
+    requestNewLink: "Request New Link",
 
     // Diary Page
     newEntryTitle: "Title",
@@ -169,12 +186,29 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     // Password Reset Page
     forgotPassword: "비밀번호를 잊으셨나요?",
     resetPassword: "비밀번호 재설정",
-    passwordResetEmailSent: "비밀번호 재설정 링크가 이메일로 전송되었습니다.",
-    checkEmailForReset: "이메일을 확인하여 비밀번호를 재설정하세요.",
+    enterEmailForReset: "비밀번호 재설정 링크를 받을 이메일 주소를 입력하세요",
+    sendResetLink: "재설정 링크 전송",
+    passwordResetEmailSentTo: "비밀번호 재설정 링크가 전송되었습니다:",
+    resendAvailableIn: "{seconds}초 후에 재전송할 수 있습니다",
     didntReceiveEmail: "이메일을 받지 못하셨나요?",
     resendEmail: "이메일 재전송",
     verificationCodeResent: "인증 코드가 재전송되었습니다!",
     passwordResetEmailResent: "비밀번호 재설정 이메일이 재전송되었습니다!",
+    enterNewPassword: "새로운 비밀번호를 입력해주세요",
+    confirmPassword: "비밀번호 확인",
+    resetPasswordButton: "비밀번호 변경",
+    goToLogin: "로그인으로 이동",
+
+    // Password Reset Errors
+    invalidAccess: "잘못된 접근",
+    invalidAccessDesc: "유효한 재설정 토큰이 필요합니다",
+    linkExpired: "링크 만료",
+    linkExpiredDesc: "재설정 링크가 만료되었습니다",
+    invalidLink: "유효하지 않은 링크",
+    invalidLinkDesc: "유효하지 않은 재설정 링크입니다",
+    linkAlreadyUsed: "이미 사용된 링크",
+    linkAlreadyUsedDesc: "이미 사용된 재설정 링크입니다",
+    requestNewLink: "새 링크 요청",
 
     // Diary Page
     newEntryTitle: "제목",

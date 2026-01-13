@@ -62,13 +62,28 @@ export function resendVerificationCode(): { success: boolean } {
 }
 
 // TODO: Replace with actual API call to POST /api/auth/password-reset/send
-export function sendPasswordResetEmail(): { success: boolean } {
-  console.warn("sendPasswordResetEmail: API not implemented yet");
-  return { success: false };
+export function sendPasswordResetEmail(email: string): {
+  success: boolean;
+  error?: string;
+} {
+  console.log("sendPasswordResetEmail called with:", email);
+  // TODO: API 연동 - POST /auth/forgot-password
+  // TODO: Body: { email, language }
+  // TODO: Response: { success: boolean, message?: string }
+
+  // Mock: 항상 성공 반환
+  return { success: true };
 }
 
 // TODO: Replace with actual API call to POST /api/auth/password-reset/resend
-export function resendPasswordResetEmail(): { success: boolean } {
-  console.warn("resendPasswordResetEmail: API not implemented yet");
-  return { success: false };
+export function resendPasswordResetEmail(email: string): {
+  success: boolean;
+  error?: string;
+} {
+  console.log("resendPasswordResetEmail called with:", email);
+  // TODO: API 연동 - POST /auth/forgot-password (재사용)
+  // TODO: Body: { email, language }
+
+  // Mock: 항상 성공 반환
+  return { success: true };
 }
