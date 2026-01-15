@@ -23,7 +23,7 @@ export class EmailService {
   async sendVerificationEmail(
     email: string,
     name: string,
-    code: string
+    code: string,
   ): Promise<void> {
     const html = `
       <!DOCTYPE html>
@@ -84,7 +84,7 @@ export class EmailService {
   async sendPasswordResetEmail(
     email: string,
     name: string,
-    token: string
+    token: string,
   ): Promise<void> {
     const frontendUrl =
       this.configService.get<string>("app.frontendUrl") ||
@@ -157,7 +157,7 @@ export class EmailService {
     } catch (error) {
       this.logger.error(
         `Failed to send password reset email to ${email}`,
-        error
+        error,
       );
       throw error;
     }

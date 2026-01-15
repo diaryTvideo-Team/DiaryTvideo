@@ -3,7 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { User } from "@prisma/client";
 
 @Injectable()
-export class UsersRepository {
+export class UserRepository {
   constructor(private prisma: PrismaService) {}
 
   // 유저 생성
@@ -35,6 +35,16 @@ export class UsersRepository {
     });
   }
 
+  // 아이디로 유저 찾기
+  async findById(id: number): Promise<User | null> {
+    return this.prisma.user.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+    });
+  }
+
   // 이메일 인증 처리
   async markEmailAsVerified(userId: number): Promise<User> {
     return this.prisma.user.update({
@@ -51,7 +61,7 @@ export class UsersRepository {
   async updateRefreshToken(
     userId: number,
     refreshToken: string | null,
-    expiresAt: Date | null
+    expiresAt: Date | null,
   ): Promise<User> {
     return this.prisma.user.update({
       where: { id: userId },
@@ -66,7 +76,7 @@ export class UsersRepository {
   async updateVerificationToken(
     userId: number,
     token: string,
-    expiresAt: Date
+    expiresAt: Date,
   ): Promise<User> {
     return this.prisma.user.update({
       where: { id: userId },
@@ -135,7 +145,7 @@ export class UsersRepository {
   async updatePasswordResetToken(
     userId: number,
     token: string,
-    expiresAt: Date
+    expiresAt: Date,
   ): Promise<void> {
     await this.prisma.user.update({
       where: { id: userId },
@@ -164,6 +174,34 @@ export class UsersRepository {
         passwordHash: newPasswordHash,
         passwordResetToken: null,
         passwordResetTokenExpiresAt: null,
+      },
+    });
+  }
+
+  // 이름 업데이트
+  async updateName(userId: number, name: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId, deletedAt: null },
+      data: { name },
+    });
+  }
+
+  // 비밀번호 업데이트
+  async updatePassword(userId: number, passwordHash: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId, deletedAt: null },
+      data: { passwordHash },
+    });
+  }
+
+  // 소프트 삭제
+  async softDelete(userId: number): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId, deletedAt: null },
+      data: {
+        deletedAt: new Date(),
+        refreshToken: null,
+        refreshTokenExpiresAt: null,
       },
     });
   }

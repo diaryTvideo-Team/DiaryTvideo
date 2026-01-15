@@ -91,4 +91,30 @@ export const AuthErrors = {
     en: "This password reset link has already been used.",
     ko: "이미 사용된 비밀번호 재설정 링크입니다.",
   }),
+
+  // 토큰 관련 에러
+  ACCESS_TOKEN_EXPIRED: i18nMessage({
+    en: "Access token has expired. Please refresh your token.",
+    ko: "액세스 토큰이 만료되었습니다. 토큰을 갱신해주세요.",
+  }),
+  INVALID_TOKEN: i18nMessage({
+    en: "Invalid token",
+    ko: "유효하지 않은 토큰입니다",
+  }),
+  TOKEN_REQUIRED: i18nMessage({
+    en: "Authentication token is required",
+    ko: "인증 토큰이 필요합니다",
+  }),
+  INVALID_REFRESH_TOKEN: i18nMessage({
+    en: "Invalid refresh token",
+    ko: "유효하지 않은 리프레시 토큰입니다",
+  }),
+  REFRESH_TOKEN_EXPIRED: i18nMessage({
+    en: "Refresh token has expired. Please login again.",
+    ko: "리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.",
+  }),
+  REFRESH_TOKEN_REQUIRED: i18nMessage({
+    en: "Refresh token is required",
+    ko: "리프레시 토큰이 필요합니다",
+  }),
 } as const;

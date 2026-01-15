@@ -6,7 +6,7 @@ import { PasswordService } from "./password.service";
 import { TokenService } from "./token.service";
 import { EmailService } from "./email.service";
 import { VerificationCodeService } from "./verification-code.service";
-import { UsersModule } from "../users/users.module";
+import { UserModule } from "../user/user.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { ResetTokenService } from "./reset-token.service";
@@ -15,7 +15,7 @@ import { ResetTokenService } from "./reset-token.service";
   imports: [
     PassportModule,
     JwtModule.register({}), // Empty config, we'll provide secrets per-call
-    UsersModule,
+    UserModule,
   ],
   controllers: [AuthController],
   providers: [

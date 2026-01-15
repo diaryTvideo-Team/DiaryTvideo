@@ -14,6 +14,8 @@ import {
   JwtAccessPayload,
   LoginRequest,
   LoginRequestSchema,
+  RefreshTokenRequest,
+  RefreshTokenRequestSchema,
   ResetPasswordRequest,
   ResetPasswordRequestSchema,
   SignupRequest,
@@ -76,5 +78,11 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(ResetPasswordRequestSchema))
   async resetPassword(@Body() data: ResetPasswordRequest) {
     return this.authService.resetPassword(data.token, data.newPassword);
+  }
+
+  @Post("refresh")
+  @UsePipes(new ZodValidationPipe(RefreshTokenRequestSchema))
+  async refresh(@Body() data: RefreshTokenRequest) {
+    return this.authService.refreshAccessToken(data.refreshToken);
   }
 }

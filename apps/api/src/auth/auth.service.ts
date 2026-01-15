@@ -4,7 +4,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from "@nestjs/common";
-import { UsersRepository } from "../users/users.repository";
+import { UserRepository } from "../user/user.repository";
 import { PasswordService } from "./password.service";
 import { TokenService } from "./token.service";
 import { EmailService } from "./email.service";
@@ -16,21 +16,22 @@ import {
   LoginRequest,
   VerifyEmailRequest,
   AuthErrors,
+  JwtRefreshPayload,
 } from "@repo/types";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersRepository: UsersRepository,
+    private userRepository: UserRepository,
     private passwordService: PasswordService,
     private tokenService: TokenService,
     private emailService: EmailService,
     private verificationCodeService: VerificationCodeService,
-    private resetTokenService: ResetTokenService
+    private resetTokenService: ResetTokenService,
   ) {}
 
   async signup(data: SignupRequest): Promise<{ message: string }> {
-    const existingUser = await this.usersRepository.findByEmail(data.email);
+    const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new ConflictException(AuthErrors.EMAIL_ALREADY_REGISTERED);
     }
@@ -40,7 +41,7 @@ export class AuthService {
     const verificationExpiration =
       this.verificationCodeService.calculateExpiration();
 
-    const user = await this.usersRepository.create({
+    const user = await this.userRepository.create({
       email: data.email,
       name: data.name,
       passwordHash,
@@ -51,7 +52,7 @@ export class AuthService {
     await this.emailService.sendVerificationEmail(
       user.email,
       user.name,
-      verificationCode
+      verificationCode,
     );
 
     return {
@@ -61,7 +62,7 @@ export class AuthService {
   }
 
   async verifyEmail(data: VerifyEmailRequest): Promise<AuthResponse> {
-    const user = await this.usersRepository.findByEmail(data.email);
+    const user = await this.userRepository.findByEmail(data.email);
 
     if (!user) {
       throw new NotFoundException(AuthErrors.USER_NOT_FOUND);
@@ -79,20 +80,20 @@ export class AuthService {
       throw new BadRequestException(AuthErrors.VERIFICATION_CODE_EXPIRED);
     }
 
-    await this.usersRepository.markEmailAsVerified(user.id);
+    await this.userRepository.markEmailAsVerified(user.id);
 
     const tokens = this.tokenService.generateTokenPair(user.id, user.email);
 
     const hashedRefreshToken = await this.passwordService.hashPassword(
-      tokens.refreshToken
+      tokens.refreshToken,
     );
     const refreshTokenExpiration =
       this.tokenService.calculateRefreshTokenExpiration();
 
-    await this.usersRepository.updateRefreshToken(
+    await this.userRepository.updateRefreshToken(
       user.id,
       hashedRefreshToken,
-      refreshTokenExpiration
+      refreshTokenExpiration,
     );
 
     return {
@@ -110,7 +111,7 @@ export class AuthService {
     if (!email || email.trim() === "") {
       throw new BadRequestException(AuthErrors.EMAIL_REQUIRED);
     }
-    const user = await this.usersRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
       throw new NotFoundException(AuthErrors.USER_NOT_FOUND);
@@ -124,16 +125,16 @@ export class AuthService {
     const verificationExpiration =
       this.verificationCodeService.calculateExpiration();
 
-    await this.usersRepository.updateVerificationToken(
+    await this.userRepository.updateVerificationToken(
       user.id,
       verificationCode,
-      verificationExpiration
+      verificationExpiration,
     );
 
     await this.emailService.sendVerificationEmail(
       user.email,
       user.name,
-      verificationCode
+      verificationCode,
     );
 
     return {
@@ -142,7 +143,7 @@ export class AuthService {
   }
 
   async signin(data: LoginRequest): Promise<AuthResponse> {
-    const user = await this.usersRepository.findByEmail(data.email);
+    const user = await this.userRepository.findByEmail(data.email);
 
     // 계정 잠금 확인
     if (user?.accountLockedUntil && user.accountLockedUntil > new Date()) {
@@ -151,29 +152,29 @@ export class AuthService {
 
     // 잠금 기간이 지났으면 실패 카운트 리셋
     if (user?.accountLockedUntil && user.accountLockedUntil <= new Date()) {
-      await this.usersRepository.resetLoginAttempts(user.id);
+      await this.userRepository.resetLoginAttempts(user.id);
     }
 
     // 사용자 존재 및 비밀번호 검증 (통합된 에러 메시지)
     const isPasswordValid = user
       ? await this.passwordService.comparePassword(
           data.password,
-          user.passwordHash
+          user.passwordHash,
         )
       : false;
 
     if (!user || !isPasswordValid) {
       // 사용자가 존재하면 실패 카운트 증가
       if (user) {
-        const updatedUser = await this.usersRepository.recordFailedLoginAttempt(
-          user.id
+        const updatedUser = await this.userRepository.recordFailedLoginAttempt(
+          user.id,
         );
 
         // 5회 실패 시 계정 잠금 (15분)
         if (updatedUser.failedLoginAttempts >= 5) {
           const lockUntil = new Date();
           lockUntil.setMinutes(lockUntil.getMinutes() + 15);
-          await this.usersRepository.lockAccount(user.id, lockUntil);
+          await this.userRepository.lockAccount(user.id, lockUntil);
         }
       }
 
@@ -186,21 +187,21 @@ export class AuthService {
     }
 
     // 로그인 성공 처리
-    await this.usersRepository.resetLoginAttempts(user.id);
-    await this.usersRepository.recordSuccessfulLogin(user.id);
+    await this.userRepository.resetLoginAttempts(user.id);
+    await this.userRepository.recordSuccessfulLogin(user.id);
 
     // 토큰 생성 및 저장
     const tokens = this.tokenService.generateTokenPair(user.id, user.email);
     const hashedRefreshToken = await this.passwordService.hashPassword(
-      tokens.refreshToken
+      tokens.refreshToken,
     );
     const refreshTokenExpiration =
       this.tokenService.calculateRefreshTokenExpiration();
 
-    await this.usersRepository.updateRefreshToken(
+    await this.userRepository.updateRefreshToken(
       user.id,
       hashedRefreshToken,
-      refreshTokenExpiration
+      refreshTokenExpiration,
     );
 
     return {
@@ -215,7 +216,7 @@ export class AuthService {
   }
 
   async logout(userId: number): Promise<{ message: string }> {
-    await this.usersRepository.clearRefreshToken(userId);
+    await this.userRepository.clearRefreshToken(userId);
 
     return {
       message: "Logged out successfully",
@@ -224,7 +225,7 @@ export class AuthService {
 
   // 비밀번호 재설정 요청
   async requestPasswordReset(email: string): Promise<{ message: string }> {
-    const user = await this.usersRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
 
     // 보안: 이메일 존재 여부 노출 방지 - 항상 성공 메시지 반환
     if (!user) {
@@ -238,17 +239,17 @@ export class AuthService {
     const tokenExpiration = this.resetTokenService.calculateExpiration();
 
     // DB 저장
-    await this.usersRepository.updatePasswordResetToken(
+    await this.userRepository.updatePasswordResetToken(
       user.id,
       resetToken,
-      tokenExpiration
+      tokenExpiration,
     );
 
     // 이메일 전송
     await this.emailService.sendPasswordResetEmail(
       user.email,
       user.name,
-      resetToken
+      resetToken,
     );
 
     return {
@@ -258,9 +259,9 @@ export class AuthService {
 
   // 토큰 검증 (페이지 로딩 시)
   async verifyResetToken(
-    token: string
+    token: string,
   ): Promise<{ valid: boolean; email: string }> {
-    const user = await this.usersRepository.findByPasswordResetToken(token);
+    const user = await this.userRepository.findByPasswordResetToken(token);
 
     if (!user) {
       throw new BadRequestException(AuthErrors.INVALID_RESET_TOKEN);
@@ -280,9 +281,9 @@ export class AuthService {
   // 비밀번호 재설정
   async resetPassword(
     token: string,
-    newPassword: string
+    newPassword: string,
   ): Promise<{ message: string }> {
-    const user = await this.usersRepository.findByPasswordResetToken(token);
+    const user = await this.userRepository.findByPasswordResetToken(token);
 
     if (!user) {
       throw new BadRequestException(AuthErrors.INVALID_RESET_TOKEN);
@@ -297,14 +298,54 @@ export class AuthService {
       await this.passwordService.hashPassword(newPassword);
 
     // 비밀번호 업데이트 + 토큰 클리어
-    await this.usersRepository.resetPassword(user.id, newPasswordHash);
+    await this.userRepository.resetPassword(user.id, newPasswordHash);
 
     // 보안: 모든 리프레시 토큰 무효화
-    await this.usersRepository.clearRefreshToken(user.id);
+    await this.userRepository.clearRefreshToken(user.id);
 
     return {
       message:
         "Password has been reset successfully. Please login with your new password.",
     };
+  }
+
+  // 액세스 토큰 갱신
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string }> {
+    let payload: JwtRefreshPayload;
+    try {
+      payload = this.tokenService.verifyRefreshToken(refreshToken);
+    } catch {
+      throw new BadRequestException(AuthErrors.INVALID_REFRESH_TOKEN);
+    }
+
+    // 2. DB에서 사용자 및 저장된 리프레시 토큰 조회
+    const user = await this.userRepository.findById(payload.sub);
+    if (!user || !user.refreshToken) {
+      throw new BadRequestException(AuthErrors.INVALID_REFRESH_TOKEN);
+    }
+
+    // 3. 리프레시 토큰 만료 시간 확인
+    if (user.refreshTokenExpiresAt && user.refreshTokenExpiresAt < new Date()) {
+      throw new BadRequestException(AuthErrors.REFRESH_TOKEN_EXPIRED);
+    }
+
+    // 4. 제공된 리프레시 토큰과 DB에 저장된 해시값 비교(비밀번호 비교 사용)
+    const isTokenValid = await this.passwordService.comparePassword(
+      refreshToken,
+      user.refreshToken,
+    );
+    if (!isTokenValid) {
+      throw new BadRequestException(AuthErrors.INVALID_REFRESH_TOKEN);
+    }
+
+    // 5. 새로운 액세스 토큰 발급
+    const accessToken = this.tokenService.generateAccessToken(
+      user.id,
+      user.email,
+    );
+
+    return { accessToken };
   }
 }

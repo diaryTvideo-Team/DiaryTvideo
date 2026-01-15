@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { EmailSchema, NameSchema, PasswordSchema } from "./common";
+import { AuthErrors } from "./authErrors";
 
 // 인증 요청 스키마
 export const SignupRequestSchema = z.object({
@@ -60,6 +61,10 @@ export const ResetPasswordRequestSchema = z.object({
   newPassword: PasswordSchema,
 });
 
+export const RefreshTokenRequestSchema = z.object({
+  refreshToken: z.string().min(1, AuthErrors.TOKEN_REQUIRED),
+});
+
 export type VerifyResetTokenRequest = z.infer<
   typeof VerifyResetTokenRequestSchema
 >;
@@ -72,3 +77,4 @@ export type AuthTokens = z.infer<typeof AuthTokensSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 export type JwtAccessPayload = z.infer<typeof JwtAccessPayloadSchema>;
 export type JwtRefreshPayload = z.infer<typeof JwtRefreshPayloadSchema>;
+export type RefreshTokenRequest = z.infer<typeof RefreshTokenRequestSchema>;

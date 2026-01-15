@@ -8,7 +8,7 @@ import * as crypto from "crypto";
 export class TokenService {
   constructor(
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {}
 
   generateAccessToken(userId: number, email: string): string {
@@ -79,7 +79,7 @@ export class TokenService {
 
   calculateRefreshTokenExpiration(): Date {
     const expirationString = this.configService.get<string>(
-      "jwt.refreshExpiration"
+      "jwt.refreshExpiration",
     )!;
     const days = parseInt(expirationString.replace("d", ""), 10);
     const expiresAt = new Date();
