@@ -96,7 +96,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           const parsedUsers = JSON.parse(users);
           const user = parsedUsers.find(
             (u: { email: string }) =>
-              u.email.toLowerCase() === email.toLowerCase()
+              u.email.toLowerCase() === email.toLowerCase(),
           );
           if (user) {
             const publicUser = {
@@ -107,7 +107,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             };
             localStorage.setItem(
               "diary_current_user",
-              JSON.stringify(publicUser)
+              JSON.stringify(publicUser),
             );
             refreshUser();
             router.push("/diary");
@@ -156,7 +156,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const handleVerificationCodeKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
+    e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === "Backspace" && !verificationCode[index] && index > 0) {
       // Move to previous input on backspace if current is empty
@@ -206,7 +206,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   };
 
   const isVerificationComplete = verificationCode.every(
-    (digit) => digit !== ""
+    (digit) => digit !== "",
   );
 
   if (mode === "forgot-password") {

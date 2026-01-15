@@ -2,5 +2,7 @@ export * from "./language";
 export * from "./common";
 export * from "./auth";
 export * from "./user";
+export * from "./diary";
 export * from "./authErrors";
 export * from "./userErrors";
+export * from "./diaryErrors";
