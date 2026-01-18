@@ -6,3 +6,4 @@ export * from "./diary";
 export * from "./authErrors";
 export * from "./userErrors";
 export * from "./diaryErrors";
+export * from "./video";

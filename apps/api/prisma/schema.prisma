@@ -53,10 +53,20 @@ model DiaryEntry {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
+  videoStatus  VideoStatus  @default(PENDING) @map("video_status")
+  videoError   String?      @map("video_error") @db.Text
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([videoStatus])
   @@index([userId])
   @@index([createdAt])
   @@map("diary_entries")
+}
+
+enum VideoStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }

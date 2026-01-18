@@ -5,10 +5,14 @@ import {
 } from "@nestjs/common";
 import { DiaryRepository } from "./diary.repository";
 import { CreateDiaryRequest, DiaryErrors } from "@repo/types";
+import { VideoProducer } from "src/video/video.producer";
 
 @Injectable()
 export class DiaryService {
-  constructor(private readonly diaryRepository: DiaryRepository) {}
+  constructor(
+    private readonly diaryRepository: DiaryRepository,
+    private readonly videoProducer: VideoProducer
+  ) {}
 
   // 일기 목록 조회
   async getEntries(userId: number, date: string) {
@@ -22,7 +26,17 @@ export class DiaryService {
 
   // 일기 생성
   async createEntry(userId: number, data: CreateDiaryRequest) {
-    return this.diaryRepository.create({ userId, ...data });
+    const diary = await this.diaryRepository.create({ userId, ...data });
+
+    // 2. 비디오 생성 작업 큐에 등록 (비동기, non-blocking)
+    await this.videoProducer.addVideoGenerationJob({
+      diaryId: diary.id,
+      userId,
+      title: data.title,
+      content: data.content,
+    });
+
+    return diary;
   }
 
   // 일기 삭제

@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { VideoStatus } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -37,6 +38,17 @@ export class DiaryRepository {
     return this.prisma.diaryEntry.update({
       where: { id },
       data: { deletedAt: new Date() },
+    });
+  }
+
+  // 비디오 상태 업데이트
+  async updateVideoStatus(id: string, status: VideoStatus, error?: string) {
+    return this.prisma.diaryEntry.update({
+      where: { id },
+      data: {
+        videoStatus: status,
+        videoError: error ?? null,
+      },
     });
   }
 }
