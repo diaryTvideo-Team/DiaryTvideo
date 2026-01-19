@@ -9,15 +9,19 @@ import {
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import {
+  ApiResponse,
+  AuthData,
   ForgotPasswordRequest,
   ForgotPasswordRequestSchema,
   JwtAccessPayload,
   LoginRequest,
   LoginRequestSchema,
+  RefreshData,
   RefreshTokenRequest,
   RefreshTokenRequestSchema,
   ResetPasswordRequest,
   ResetPasswordRequestSchema,
+  ResetTokenData,
   SignupRequest,
   SignupRequestSchema,
   VerifyEmailRequest,
@@ -35,54 +39,64 @@ export class AuthController {
 
   @Post("signup")
   @UsePipes(new ZodValidationPipe(SignupRequestSchema))
-  async signup(@Body() data: SignupRequest) {
+  async signup(@Body() data: SignupRequest): Promise<ApiResponse> {
     return this.authService.signup(data);
   }
 
   @Post("verify-email")
   @UsePipes(new ZodValidationPipe(VerifyEmailRequestSchema))
-  async verifyEmail(@Body() data: VerifyEmailRequest) {
+  async verifyEmail(
+    @Body() data: VerifyEmailRequest,
+  ): Promise<ApiResponse<AuthData>> {
     return this.authService.verifyEmail(data);
   }
 
   @Post("resend-verification")
-  async resendVerification(@Body("email") email: string) {
+  async resendVerification(@Body("email") email: string): Promise<ApiResponse> {
     return this.authService.resendVerificationEmail(email);
   }
 
   @Post("signin")
   @UsePipes(new ZodValidationPipe(LoginRequestSchema))
-  async signin(@Body() data: LoginRequest) {
+  async signin(@Body() data: LoginRequest): Promise<ApiResponse<AuthData>> {
     return this.authService.signin(data);
   }
 
   @Post("logout")
   @UseGuards(JwtAuthGuard)
-  async logout(@CurrentUser() user: JwtAccessPayload) {
+  async logout(@CurrentUser() user: JwtAccessPayload): Promise<ApiResponse> {
     return this.authService.logout(user.sub);
   }
 
   @Post("forgot-password")
   @UsePipes(new ZodValidationPipe(ForgotPasswordRequestSchema))
-  async forgotPassword(@Body() data: ForgotPasswordRequest) {
+  async forgotPassword(
+    @Body() data: ForgotPasswordRequest,
+  ): Promise<ApiResponse> {
     return this.authService.requestPasswordReset(data.email);
   }
 
   @Get("verify-reset-token")
   @UsePipes(new ZodValidationPipe(VerifyResetTokenRequestSchema))
-  async verifyResetToken(@Query() query: VerifyResetTokenRequest) {
+  async verifyResetToken(
+    @Query() query: VerifyResetTokenRequest,
+  ): Promise<ApiResponse<ResetTokenData>> {
     return this.authService.verifyResetToken(query.token);
   }
 
   @Post("reset-password")
   @UsePipes(new ZodValidationPipe(ResetPasswordRequestSchema))
-  async resetPassword(@Body() data: ResetPasswordRequest) {
+  async resetPassword(
+    @Body() data: ResetPasswordRequest,
+  ): Promise<ApiResponse> {
     return this.authService.resetPassword(data.token, data.newPassword);
   }
 
   @Post("refresh")
   @UsePipes(new ZodValidationPipe(RefreshTokenRequestSchema))
-  async refresh(@Body() data: RefreshTokenRequest) {
+  async refresh(
+    @Body() data: RefreshTokenRequest,
+  ): Promise<ApiResponse<RefreshData>> {
     return this.authService.refreshAccessToken(data.refreshToken);
   }
 }

@@ -7,6 +7,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import {
+  ApiResponse,
   ChangePasswordRequest,
   ChangePasswordRequestSchema,
   DeleteAccountRequest,
@@ -14,6 +15,7 @@ import {
   JwtAccessPayload,
   UpdateNameRequest,
   UpdateNameRequestSchema,
+  UserData,
 } from "@repo/types";
 import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
@@ -26,7 +28,9 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get("me")
-  async getUser(@CurrentUser() user: JwtAccessPayload) {
+  async getUser(
+    @CurrentUser() user: JwtAccessPayload,
+  ): Promise<ApiResponse<UserData>> {
     return this.userService.getUser(user.sub);
   }
 
@@ -35,7 +39,7 @@ export class UserController {
     @CurrentUser() user: JwtAccessPayload,
     @Body(new ZodValidationPipe(UpdateNameRequestSchema))
     data: UpdateNameRequest,
-  ) {
+  ): Promise<ApiResponse<UserData>> {
     return this.userService.updateName(user.sub, data.name);
   }
 
@@ -44,7 +48,7 @@ export class UserController {
     @CurrentUser() user: JwtAccessPayload,
     @Body(new ZodValidationPipe(ChangePasswordRequestSchema))
     data: ChangePasswordRequest,
-  ) {
+  ): Promise<ApiResponse> {
     return this.userService.changePassword(
       user.sub,
       data.currentPassword,
@@ -57,7 +61,7 @@ export class UserController {
     @CurrentUser() user: JwtAccessPayload,
     @Body(new ZodValidationPipe(DeleteAccountRequestSchema))
     data: DeleteAccountRequest,
-  ) {
+  ): Promise<ApiResponse> {
     return this.userService.deleteAccount(user.sub, data.password);
   }
 }

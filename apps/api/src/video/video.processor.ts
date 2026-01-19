@@ -11,7 +11,7 @@ export class VideoProcessor extends WorkerHost {
 
   constructor(
     private readonly videoGateway: VideoGateway,
-    private readonly diaryRepository: DiaryRepository
+    private readonly diaryRepository: DiaryRepository,
   ) {
     super();
   }
@@ -76,7 +76,7 @@ export class VideoProcessor extends WorkerHost {
       await this.diaryRepository.updateVideoStatus(
         diaryId,
         "FAILED",
-        "영상 생성에 실패했습니다."
+        "영상 생성에 실패했습니다.",
       );
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,

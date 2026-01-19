@@ -12,11 +12,14 @@ import { VerificationCodeService } from "./verification-code.service";
 import { ResetTokenService } from "./reset-token.service";
 import {
   SignupRequest,
-  AuthResponse,
   LoginRequest,
   VerifyEmailRequest,
   AuthErrors,
   JwtRefreshPayload,
+  ApiResponse,
+  AuthData,
+  ResetTokenData,
+  RefreshData,
 } from "@repo/types";
 
 @Injectable()
@@ -30,7 +33,7 @@ export class AuthService {
     private resetTokenService: ResetTokenService,
   ) {}
 
-  async signup(data: SignupRequest): Promise<{ message: string }> {
+  async signup(data: SignupRequest): Promise<ApiResponse> {
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new ConflictException(AuthErrors.EMAIL_ALREADY_REGISTERED);
@@ -56,12 +59,13 @@ export class AuthService {
     );
 
     return {
+      success: true,
       message:
         "Signup successful. Please check your email for verification code.",
     };
   }
 
-  async verifyEmail(data: VerifyEmailRequest): Promise<AuthResponse> {
+  async verifyEmail(data: VerifyEmailRequest): Promise<ApiResponse<AuthData>> {
     const user = await this.userRepository.findByEmail(data.email);
 
     if (!user) {
@@ -97,17 +101,20 @@ export class AuthService {
     );
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        emailVerified: true,
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          emailVerified: true,
+        },
+        tokens,
       },
-      tokens,
     };
   }
 
-  async resendVerificationEmail(email: string): Promise<{ message: string }> {
+  async resendVerificationEmail(email: string): Promise<ApiResponse> {
     if (!email || email.trim() === "") {
       throw new BadRequestException(AuthErrors.EMAIL_REQUIRED);
     }
@@ -138,11 +145,12 @@ export class AuthService {
     );
 
     return {
+      success: true,
       message: "Verification email sent. Please check your inbox.",
     };
   }
 
-  async signin(data: LoginRequest): Promise<AuthResponse> {
+  async signin(data: LoginRequest): Promise<ApiResponse<AuthData>> {
     const user = await this.userRepository.findByEmail(data.email);
 
     // 계정 잠금 확인
@@ -205,31 +213,36 @@ export class AuthService {
     );
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        emailVerified: user.emailVerified, // 하드코딩 제거
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          emailVerified: user.emailVerified, // 하드코딩 제거
+        },
+        tokens,
       },
-      tokens,
     };
   }
 
-  async logout(userId: number): Promise<{ message: string }> {
+  async logout(userId: number): Promise<ApiResponse> {
     await this.userRepository.clearRefreshToken(userId);
 
     return {
+      success: true,
       message: "Logged out successfully",
     };
   }
 
   // 비밀번호 재설정 요청
-  async requestPasswordReset(email: string): Promise<{ message: string }> {
+  async requestPasswordReset(email: string): Promise<ApiResponse> {
     const user = await this.userRepository.findByEmail(email);
 
     // 보안: 이메일 존재 여부 노출 방지 - 항상 성공 메시지 반환
     if (!user) {
       return {
+        success: true,
         message: "If the email exists, a password reset link has been sent.",
       };
     }
@@ -253,14 +266,13 @@ export class AuthService {
     );
 
     return {
+      success: true,
       message: "If the email exists, a password reset link has been sent.",
     };
   }
 
   // 토큰 검증 (페이지 로딩 시)
-  async verifyResetToken(
-    token: string,
-  ): Promise<{ valid: boolean; email: string }> {
+  async verifyResetToken(token: string): Promise<ApiResponse<ResetTokenData>> {
     const user = await this.userRepository.findByPasswordResetToken(token);
 
     if (!user) {
@@ -273,8 +285,11 @@ export class AuthService {
 
     // 토큰 유효 - 이메일 반환 (UI에 표시용)
     return {
-      valid: true,
-      email: user.email,
+      success: true,
+      data: {
+        valid: true,
+        email: user.email,
+      },
     };
   }
 
@@ -282,7 +297,7 @@ export class AuthService {
   async resetPassword(
     token: string,
     newPassword: string,
-  ): Promise<{ message: string }> {
+  ): Promise<ApiResponse> {
     const user = await this.userRepository.findByPasswordResetToken(token);
 
     if (!user) {
@@ -304,6 +319,7 @@ export class AuthService {
     await this.userRepository.clearRefreshToken(user.id);
 
     return {
+      success: true,
       message:
         "Password has been reset successfully. Please login with your new password.",
     };
@@ -312,7 +328,7 @@ export class AuthService {
   // 액세스 토큰 갱신
   async refreshAccessToken(
     refreshToken: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<ApiResponse<RefreshData>> {
     let payload: JwtRefreshPayload;
     try {
       payload = this.tokenService.verifyRefreshToken(refreshToken);
@@ -346,6 +362,11 @@ export class AuthService {
       user.email,
     );
 
-    return { accessToken };
+    return {
+      success: true,
+      data: {
+        accessToken,
+      },
+    };
   }
 }

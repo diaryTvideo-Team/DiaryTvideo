@@ -12,6 +12,8 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { DiaryService } from "./diary.service";
 import {
+  ApiResponse,
+  DiaryData,
   JwtAccessPayload,
   GetDiaryQueryRequest,
   GetDiaryQuerySchema,
@@ -32,7 +34,7 @@ export class DiaryController {
     @CurrentUser() user: JwtAccessPayload,
     @Query(new ZodValidationPipe(GetDiaryQuerySchema))
     query: GetDiaryQueryRequest,
-  ) {
+  ): Promise<ApiResponse<DiaryData[]>> {
     return this.diaryService.getEntries(user.sub, query.filterDate);
   }
 
@@ -41,7 +43,7 @@ export class DiaryController {
     @CurrentUser() user: JwtAccessPayload,
     @Body(new ZodValidationPipe(CreateDiaryRequestSchema))
     data: CreateDiaryRequest,
-  ) {
+  ): Promise<ApiResponse<DiaryData>> {
     return this.diaryService.createEntry(user.sub, data);
   }
 
@@ -50,7 +52,7 @@ export class DiaryController {
     @CurrentUser() user: JwtAccessPayload,
     @Param(new ZodValidationPipe(DeleteDiaryParamsSchema))
     data: DeleteDiaryParams,
-  ) {
+  ): Promise<ApiResponse<DiaryData>> {
     return this.diaryService.deleteEntry(user.sub, data.id);
   }
 }

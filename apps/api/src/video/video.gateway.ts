@@ -26,7 +26,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   // 웹 소켓 클라이언트 연결 시 호출
@@ -40,7 +40,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const payload = await this.jwtService.verifyAsync<JwtAccessPayload>(
         token,
-        { secret: this.configService.getOrThrow<string>("jwt.accessSecret") }
+        { secret: this.configService.getOrThrow<string>("jwt.accessSecret") },
       );
 
       (client.data as { user: JwtAccessPayload }).user = payload;

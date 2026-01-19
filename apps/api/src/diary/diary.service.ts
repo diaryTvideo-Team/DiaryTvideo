@@ -4,28 +4,45 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { DiaryRepository } from "./diary.repository";
-import { CreateDiaryRequest, DiaryErrors } from "@repo/types";
+import {
+  ApiResponse,
+  CreateDiaryRequest,
+  DiaryData,
+  DiaryErrors,
+} from "@repo/types";
 import { VideoProducer } from "src/video/video.producer";
+import { toDiaryData } from "./mapper/diary.mapper";
 
 @Injectable()
 export class DiaryService {
   constructor(
     private readonly diaryRepository: DiaryRepository,
-    private readonly videoProducer: VideoProducer
+    private readonly videoProducer: VideoProducer,
   ) {}
 
   // 일기 목록 조회
-  async getEntries(userId: number, date: string) {
+  async getEntries(
+    userId: number,
+    date: string,
+  ): Promise<ApiResponse<DiaryData[]>> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    return this.diaryRepository.findByUserId(userId, startOfDay, endOfDay);
+    const diaries = await this.diaryRepository.findByUserId(
+      userId,
+      startOfDay,
+      endOfDay,
+    );
+    return { success: true, data: diaries.map(toDiaryData) };
   }
 
   // 일기 생성
-  async createEntry(userId: number, data: CreateDiaryRequest) {
+  async createEntry(
+    userId: number,
+    data: CreateDiaryRequest,
+  ): Promise<ApiResponse<DiaryData>> {
     const diary = await this.diaryRepository.create({ userId, ...data });
 
     // 2. 비디오 생성 작업 큐에 등록 (비동기, non-blocking)
@@ -36,11 +53,14 @@ export class DiaryService {
       content: data.content,
     });
 
-    return diary;
+    return { success: true, data: toDiaryData(diary) };
   }
 
   // 일기 삭제
-  async deleteEntry(userId: number, diaryId: string) {
+  async deleteEntry(
+    userId: number,
+    diaryId: string,
+  ): Promise<ApiResponse<DiaryData>> {
     const diary = await this.diaryRepository.findById(diaryId);
 
     if (!diary || diary.deletedAt) {
@@ -51,6 +71,7 @@ export class DiaryService {
       throw new ForbiddenException(DiaryErrors.DIARY_OWNERSHIP_MISMATCH);
     }
 
-    return this.diaryRepository.softDelete(diaryId);
+    const deletedDiary = await this.diaryRepository.softDelete(diaryId);
+    return { success: true, data: toDiaryData(deletedDiary) };
   }
 }

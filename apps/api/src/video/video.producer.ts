@@ -30,7 +30,7 @@ export class VideoProducer {
     } catch (error: unknown) {
       this.logger.error(
         `Failed to add video generation job for diary ${data.diaryId}`,
-        error instanceof Error ? error.stack : "Unknown error"
+        error instanceof Error ? error.stack : "Unknown error",
       );
       // 큐 등록 실패해도 일기 생성은 성공하도록 에러를 던지지 않음
     }

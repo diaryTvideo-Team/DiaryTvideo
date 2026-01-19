@@ -19,22 +19,6 @@ export const VerifyEmailRequestSchema = z.object({
   code: z.string(),
 });
 
-// 응답 스키마
-export const AuthTokensSchema = z.object({
-  accessToken: z.string(),
-  refreshToken: z.string(),
-});
-
-export const AuthResponseSchema = z.object({
-  user: z.object({
-    id: z.number(),
-    email: EmailSchema,
-    name: NameSchema,
-    emailVerified: z.boolean(),
-  }),
-  tokens: AuthTokensSchema,
-});
-
 // JWT Payload 스키마
 export const JwtAccessPayloadSchema = z.object({
   sub: z.number(), // user id
@@ -73,8 +57,6 @@ export type ResetPasswordRequest = z.infer<typeof ResetPasswordRequestSchema>;
 export type SignupRequest = z.infer<typeof SignupRequestSchema>;
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 export type VerifyEmailRequest = z.infer<typeof VerifyEmailRequestSchema>;
-export type AuthTokens = z.infer<typeof AuthTokensSchema>;
-export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 export type JwtAccessPayload = z.infer<typeof JwtAccessPayloadSchema>;
 export type JwtRefreshPayload = z.infer<typeof JwtRefreshPayloadSchema>;
 export type RefreshTokenRequest = z.infer<typeof RefreshTokenRequestSchema>;
