@@ -6,6 +6,9 @@ import { DiaryRepository } from "../diary/diary.repository";
 import { VideoProducer } from "./video.producer";
 import { VideoProcessor } from "./video.processor";
 import { VideoGateway } from "./video.gateway";
+import { OpenAIService } from "./services/openai.service";
+import { SceneSplitterService } from "./services/scene-splitter.service";
+import { ImageGeneratorService } from "./services/image-generator.service";
 
 @Module({
   imports: [
@@ -25,7 +28,15 @@ import { VideoGateway } from "./video.gateway";
       name: "video-generation",
     }),
   ],
-  providers: [VideoProducer, VideoProcessor, VideoGateway, DiaryRepository],
+  providers: [
+    VideoProducer,
+    VideoProcessor,
+    VideoGateway,
+    DiaryRepository,
+    OpenAIService,
+    SceneSplitterService,
+    ImageGeneratorService,
+  ],
   exports: [VideoProducer],
 })
 export class VideoModule {}
