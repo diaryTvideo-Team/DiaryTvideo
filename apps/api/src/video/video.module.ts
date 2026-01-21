@@ -9,6 +9,10 @@ import { VideoGateway } from "./video.gateway";
 import { OpenAIService } from "./services/openai.service";
 import { SceneSplitterService } from "./services/scene-splitter.service";
 import { ImageGeneratorService } from "./services/image-generator.service";
+import { TtsService } from "./services/tts.service";
+import { SubtitleService } from "./services/subtitle.service";
+import { FfmpegService } from "./services/ffmpeg.service";
+import { WhisperService } from "./services/whisper.service";
 
 @Module({
   imports: [
@@ -36,6 +40,10 @@ import { ImageGeneratorService } from "./services/image-generator.service";
     OpenAIService,
     SceneSplitterService,
     ImageGeneratorService,
+    TtsService,
+    SubtitleService,
+    FfmpegService,
+    WhisperService,
   ],
   exports: [VideoProducer],
 })

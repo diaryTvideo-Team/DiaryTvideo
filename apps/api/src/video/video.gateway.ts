@@ -61,6 +61,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // 특정 사용자에게 영상 생성 상태를 전송
   sendVideoStatus(userId: number, data: VideoProgressMessage): void {
+    this.logger.log("[Socket.IO] " + data.message);
     this.server.to(`user:${userId}`).emit("video-status", data);
   }
 

@@ -6,6 +6,11 @@ import { DiaryRepository } from "../diary/diary.repository";
 import { VideoGateway } from "./video.gateway";
 import { SceneSplitterService } from "./services/scene-splitter.service";
 import { ImageGeneratorService } from "./services/image-generator.service";
+import { TtsService } from "./services/tts.service";
+import { WhisperService } from "./services/whisper.service";
+import { SubtitleService } from "./services/subtitle.service";
+import { FfmpegService } from "./services/ffmpeg.service";
+import { VideoStatus } from "@prisma/client";
 
 @Processor("video-generation")
 export class VideoProcessor extends WorkerHost {
@@ -16,6 +21,10 @@ export class VideoProcessor extends WorkerHost {
     private readonly diaryRepository: DiaryRepository,
     private readonly sceneSplitter: SceneSplitterService,
     private readonly imageGenerator: ImageGeneratorService,
+    private readonly ttsService: TtsService,
+    private readonly whisperService: WhisperService,
+    private readonly subtitleService: SubtitleService,
+    private readonly ffmpegService: FfmpegService,
   ) {
     super();
   }
@@ -25,36 +34,69 @@ export class VideoProcessor extends WorkerHost {
     this.logger.log(`Processing video generation for diary: ${diaryId}`);
 
     try {
-      // 1. 장면 분석 - GPT
-      await this.diaryRepository.updateVideoStatus(diaryId, "PROCESSING");
-      this.videoGateway.sendVideoStatus(userId, {
+      // 장면 분석 + 캐릭터 프로필 - GPT
+      await this.diaryRepository.updateVideoStatus(
         diaryId,
-        status: "PROCESSING",
-        message: "장면 분석 중...",
-      });
-
-      const { scenes } = await this.sceneSplitter.splitIntoScenes(
-        title,
-        content,
+        VideoStatus.PROCESSING,
       );
-      this.logger.log(`장면 분할 완료: ${scenes.length}개 장면`);
-
-      // 2. 이미지 생성 - DALL-E
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
         status: "PROCESSING",
-        message: "이미지 생성 중...",
+        message: "장면 분석 및 캐릭터 생성 중...",
       });
 
-      const images = await this.imageGenerator.generateImages(scenes);
-      this.logger.log(`이미지 생성 완료: ${images.length}개`);
+      const { character, voice, scenes } =
+        await this.sceneSplitter.splitIntoScenes(title, content);
 
-      // (임시) 생성된 이미지 URL 로그 출력
-      images.forEach((img, idx) => {
-        this.logger.log(`[이미지 ${idx + 1}] ${img.url}`);
+      // TTS + 이미지 생성 (병렬 실행)
+      this.videoGateway.sendVideoStatus(userId, {
+        diaryId,
+        status: "PROCESSING",
+        message: "음성 및 이미지 생성 중...",
       });
 
-      // 3. 완료
+      const [audios, images] = await Promise.all([
+        this.ttsService.generateAudio(scenes, voice),
+        this.imageGenerator.generateImages(scenes, character.profile),
+      ]);
+
+      // Whisper 타임스탬프 추출
+      this.videoGateway.sendVideoStatus(userId, {
+        diaryId,
+        status: "PROCESSING",
+        message: "음성 분석 중...",
+      });
+
+      const whisperResults = await this.whisperService.transcribeAll(audios);
+
+      // 자막 생성 (Whisper 기반)
+      this.videoGateway.sendVideoStatus(userId, {
+        diaryId,
+        status: "PROCESSING",
+        message: "자막 생성 중...",
+      });
+
+      const vtt = this.subtitleService.generateVttFromWhisper(whisperResults);
+
+      // 영상 합성 - FFmpeg
+      this.videoGateway.sendVideoStatus(userId, {
+        diaryId,
+        status: "PROCESSING",
+        message: "영상 합성 중...",
+      });
+
+      const durations = whisperResults.map((w) => w.duration);
+      const { videoPath, subtitlePath } = await this.ffmpegService.composeVideo(
+        diaryId,
+        images,
+        audios,
+        vtt,
+        durations,
+      );
+      this.logger.log(`영상 합성 완료: ${videoPath}`);
+      this.logger.log(`자막 파일: ${subtitlePath}`);
+
+      // 완료
       await this.diaryRepository.updateVideoStatus(diaryId, "COMPLETED");
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
@@ -64,9 +106,10 @@ export class VideoProcessor extends WorkerHost {
       this.logger.log(`Video generation completed for diary: ${diaryId}`);
     } catch (error) {
       this.logger.error(`Video generation failed for diary: ${diaryId}`, error);
+
       await this.diaryRepository.updateVideoStatus(
         diaryId,
-        "FAILED",
+        VideoStatus.FAILED,
         "영상 생성에 실패했습니다.",
       );
       this.videoGateway.sendVideoStatus(userId, {
@@ -74,6 +117,7 @@ export class VideoProcessor extends WorkerHost {
         status: "FAILED",
         message: "영상 생성에 실패했습니다.",
       });
+
       throw error;
     }
   }

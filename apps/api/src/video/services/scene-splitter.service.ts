@@ -3,13 +3,27 @@ import { OpenAIService } from "./openai.service";
 
 export interface Scene {
   scene: number;
-  description: string;
-  text: string;
+  visual: string;
+  narration: string;
+}
+
+export interface CharacterProfile {
+  profile: string;
+  inferred_from: string;
 }
 
 export interface SceneSplitResult {
+  character: CharacterProfile;
+  voice: "male" | "female";
   scenes: Scene[];
 }
+
+const DEFAULT_PROFILES = [
+  "Young Asian woman in her early 20s, long black hair, casual outfit, soft natural makeup, warm smile",
+  "Young Asian man in his mid-20s, short black hair, wearing a hoodie, relaxed expression",
+  "Young Asian woman in her late 20s, shoulder-length brown hair, minimal makeup, cozy sweater",
+  "Young Asian man in his early 30s, neat short hair, smart casual outfit, friendly demeanor",
+];
 
 @Injectable()
 export class SceneSplitterService {
@@ -21,41 +35,125 @@ export class SceneSplitterService {
   ): Promise<SceneSplitResult> {
     const client = this.openaiService.getClient();
 
-    const prompt = `당신은 일기를 영상으로 만들기 위해 장면을 분할하는 전문가입니다.
+    const systemPrompt = `You are an AI assistant that analyzes diary entries and splits them into video scenes.
 
-아래 일기를 읽고 2-4개의 장면으로 나눠주세요.
-각 장면에는:
-- scene: 장면 번호 (1부터 시작)
-- description: 이미지 생성을 위한 시각적 설명 (영어, 상세하게)
-- text: 해당 장면의 나레이션 텍스트 (한국어)
-
-JSON 형식으로만 응답해주세요.
-
-제목: ${title}
-내용: ${content}
-
-응답 형식:
+Your response MUST be a valid JSON object with this exact structure:
 {
+  "character": {
+    "profile": "detailed character description in English for image generation",
+    "inferred_from": "reasoning for the character profile"
+  },
+  "voice": "male" or "female",
   "scenes": [
     {
       "scene": 1,
-      "description": "A cozy cafe interior with warm lighting, a person sitting by the window...",
-      "text": "오늘 카페에서 조용한 시간을 보냈다."
+      "visual": "English description for image generation",
+      "narration": "Korean narration text"
     }
   ]
-}`;
+}
 
-    const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-    });
+Character profile rules:
+1. Analyze the diary content to infer the writer's characteristics (gender, age, outfit based on context)
+2. Examples:
+   - "퇴근길" (commute home) → office worker attire, beige trench coat
+   - "운동하다가" (while exercising) → sportswear, athletic outfit
+   - "학교에서" (at school) → student, school uniform or casual
+   - "아이와 놀았다" (played with child) → parent figure, comfortable clothes
+3. If unable to infer, use a neutral profile like "young adult in casual attire"
+4. The profile MUST include: gender, age range, hair style, clothing, and end with "realistic photography style, cinematic lighting"
+5. This profile will be prepended to ALL image generation prompts for consistency
 
-    const result = JSON.parse(
-      response.choices[0].message.content || "{}",
-    ) as SceneSplitResult;
+Scene rules:
+- Create 1-6 scenes based on the diary content length and complexity
+- CRITICAL: ONLY use information explicitly written in the diary. NEVER invent, imagine, or add content that is not in the original diary.
+- If the diary is very short (1-2 sentences), create just 1 scene with the exact content
+- Short diary (1-2 paragraphs): 1-2 scenes
+- Medium diary (3-4 paragraphs): 3-4 scenes
+- Long diary (5+ paragraphs): 4-6 scenes
+- visual: English description for DALL-E image generation (describe the scene, NOT the character)
+- narration: Convert the diary content to natural conversational Korean (반말/대화체). Example: "오늘 퇴근길에 힘들었다" → "오늘 퇴근길에 진짜 힘들었어". Keep the SAME meaning and information, just change the tone to casual speech. Do NOT add new details or emotions not in the original.
+- FORBIDDEN: Adding backstory, context, emotions, or details not in the original diary
+- If the diary says "오늘은 힘들었다. 끝." then narration should be exactly that, not an expanded version
+CRITICAL - DALL-E CONTENT SAFETY (MUST FOLLOW):
+- DO NOT describe people in bed, lying down, or sleeping poses
+- DO NOT mention any physical contact between people (hugging, holding hands, etc.)
+- DO NOT describe romantic or intimate moments
+- DO NOT use words like: bed, pillow, blanket, lying, sleeping, tired, exhausted, rest
+- DO NOT describe people in private spaces (bedroom, bathroom)
+- ALWAYS describe people in public or neutral spaces (cafe, park, street, office, kitchen)
+- ALWAYS describe people standing, sitting at desk/table, or walking
+- ALWAYS use safe, mundane activities: reading, working, eating, walking, talking
+- Focus on OBJECTS and ENVIRONMENT rather than the person's physical state
+- When in doubt, describe a simple outdoor scene or cafe setting
 
-    return result;
+Voice selection:
+- Infer gender from diary content
+- If unclear, default to "female"`;
+
+    const userPrompt = `Diary Title: ${title}
+Diary Content: ${content}
+
+Analyze this diary and create:
+1. A character profile based on the diary's context
+2. Split into scenes based on the diary length
+   - Use ONLY the exact content from the diary
+   - DO NOT add any information not explicitly written
+   - If the diary is short, create fewer scenes (even just 1 scene is fine)
+   - Narration must be the original Korean text, not a rewritten version`;
+
+    try {
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+      });
+
+      const responseContent = response.choices[0]?.message?.content;
+      if (!responseContent) {
+        throw new Error("GPT 응답이 비어있습니다");
+      }
+
+      const result = JSON.parse(responseContent) as SceneSplitResult;
+
+      // 장면 검증
+      if (!result.scenes || result.scenes.length === 0) {
+        throw new Error("장면 분할 결과가 비어있습니다");
+      }
+
+      // 캐릭터 프로필 검증 및 fallback
+      if (!result.character?.profile) {
+        result.character = {
+          profile:
+            DEFAULT_PROFILES[
+              Math.floor(Math.random() * DEFAULT_PROFILES.length)
+            ],
+          inferred_from: "default profile (could not infer from diary)",
+        };
+      }
+
+      // voice 기본값
+      if (!result.voice) {
+        result.voice = "female";
+      }
+
+      // 장면 필드 검증
+      for (const scene of result.scenes) {
+        if (!scene.visual || !scene.narration) {
+          throw new Error(
+            `장면 ${scene.scene} 데이터가 불완전합니다: visual, narration 필수`,
+          );
+        }
+      }
+
+      return result;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`장면 분할 실패: ${message}`);
+    }
   }
 }
