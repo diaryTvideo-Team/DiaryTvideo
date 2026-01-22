@@ -19,11 +19,6 @@ export class VideoProducer {
         removeOnFail: {
           age: 30 * 24 * 60 * 60, // 30일 후 자동 삭제
         },
-        attempts: 3, // 3번 재시도
-        backoff: {
-          type: "exponential",
-          delay: 5000, // 5초부터 시작
-        },
       });
 
       this.logger.log(`Video generation job added for diary: ${data.diaryId}`);

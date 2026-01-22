@@ -51,4 +51,19 @@ export class DiaryRepository {
       },
     });
   }
+
+  // 비디오 URL 업데이트
+  async updateVideoUrls(
+    id: string,
+    urls: {
+      videoUrl: string;
+      thumbnailUrl: string;
+      subtitleUrl: string;
+    },
+  ) {
+    return this.prisma.diaryEntry.update({
+      where: { id },
+      data: urls,
+    });
+  }
 }
