@@ -2,7 +2,9 @@ import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";
 import { VideoJobData } from "@repo/types";
+import * as fs from "fs";
 import { DiaryRepository } from "../diary/diary.repository";
+import { S3Service } from "../storage/s3.service";
 import { VideoGateway } from "./video.gateway";
 import { SceneSplitterService } from "./services/scene-splitter.service";
 import { ImageGeneratorService } from "./services/image-generator.service";
@@ -19,6 +21,7 @@ export class VideoProcessor extends WorkerHost {
   constructor(
     private readonly videoGateway: VideoGateway,
     private readonly diaryRepository: DiaryRepository,
+    private readonly s3Service: S3Service,
     private readonly sceneSplitter: SceneSplitterService,
     private readonly imageGenerator: ImageGeneratorService,
     private readonly ttsService: TtsService,
@@ -86,15 +89,50 @@ export class VideoProcessor extends WorkerHost {
       });
 
       const durations = whisperResults.map((w) => w.duration);
-      const { videoPath, subtitlePath } = await this.ffmpegService.composeVideo(
-        diaryId,
-        images,
-        audios,
-        vtt,
-        durations,
-      );
+      const { videoPath, subtitlePath, thumbnailPath } =
+        await this.ffmpegService.composeVideo(
+          diaryId,
+          images,
+          audios,
+          vtt,
+          durations,
+        );
       this.logger.log(`영상 합성 완료: ${videoPath}`);
       this.logger.log(`자막 파일: ${subtitlePath}`);
+
+      // S3 업로드
+      this.videoGateway.sendVideoStatus(userId, {
+        diaryId,
+        status: "PROCESSING",
+        message: "파일 업로드 중...",
+      });
+
+      const [videoUrl, thumbnailUrl, subtitleUrl] = await Promise.all([
+        this.s3Service.upload(
+          `videos/${diaryId}/video.mp4`,
+          fs.readFileSync(videoPath),
+          "video/mp4",
+        ),
+        this.s3Service.upload(
+          `videos/${diaryId}/thumbnail.png`,
+          fs.readFileSync(thumbnailPath),
+          "image/png",
+        ),
+        this.s3Service.upload(
+          `videos/${diaryId}/subtitle.vtt`,
+          fs.readFileSync(subtitlePath),
+          "text/vtt",
+        ),
+      ]);
+
+      this.logger.log(`S3 업로드 완료: ${videoUrl}`);
+
+      // DB에 URL 저장
+      await this.diaryRepository.updateVideoUrls(diaryId, {
+        videoUrl,
+        thumbnailUrl,
+        subtitleUrl,
+      });
 
       // 완료
       await this.diaryRepository.updateVideoStatus(diaryId, "COMPLETED");
@@ -119,6 +157,9 @@ export class VideoProcessor extends WorkerHost {
       });
 
       throw error;
+    } finally {
+      // 임시 파일 정리
+      this.ffmpegService.cleanupTempDir(diaryId);
     }
   }
 }

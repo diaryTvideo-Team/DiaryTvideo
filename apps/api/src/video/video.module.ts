@@ -3,6 +3,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { DiaryRepository } from "../diary/diary.repository";
+import { StorageModule } from "../storage/storage.module";
 import { VideoProducer } from "./video.producer";
 import { VideoProcessor } from "./video.processor";
 import { VideoGateway } from "./video.gateway";
@@ -17,6 +18,7 @@ import { WhisperService } from "./services/whisper.service";
 @Module({
   imports: [
     JwtModule.register({}),
+    StorageModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

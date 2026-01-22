@@ -9,6 +9,7 @@ import { GeneratedAudio } from "./tts.service";
 export interface VideoComposeResult {
   videoPath: string;
   subtitlePath: string;
+  thumbnailPath: string;
 }
 
 @Injectable()
@@ -97,7 +98,10 @@ export class FfmpegService {
         throw new Error("자막 파일 저장 실패");
       }
 
-      return { videoPath: outputPath, subtitlePath };
+      // 썸네일 (첫 번째 이미지 사용)
+      const thumbnailPath = imagePaths[0];
+
+      return { videoPath: outputPath, subtitlePath, thumbnailPath };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`영상 합성 실패: ${message}`);
