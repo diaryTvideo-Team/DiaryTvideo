@@ -19,14 +19,17 @@ export const AuthTokensSchema = z.object({
   refreshToken: z.string(),
 });
 
+// 인증된 사용자 정보
+export const AuthUserSchema = z.object({
+  id: z.number(),
+  email: EmailSchema,
+  name: NameSchema,
+  emailVerified: z.boolean(),
+});
+
 // verify-email, signin 응답
 export const AuthDataSchema = z.object({
-  user: z.object({
-    id: z.number(),
-    email: EmailSchema,
-    name: NameSchema,
-    emailVerified: z.boolean(),
-  }),
+  user: AuthUserSchema,
   tokens: AuthTokensSchema,
 });
 
@@ -67,6 +70,7 @@ export const DiaryDataSchema = z.object({
 });
 
 export type AuthTokens = z.infer<typeof AuthTokensSchema>;
+export type AuthUser = z.infer<typeof AuthUserSchema>;
 export type AuthData = z.infer<typeof AuthDataSchema>;
 export type RefreshData = z.infer<typeof RefreshDataSchema>;
 export type ResetTokenData = z.infer<typeof ResetTokenDataSchema>;

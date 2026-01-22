@@ -30,7 +30,7 @@ import { translations } from "@/lib/translations";
 import { updateName, updatePassword, deleteAccount } from "@/lib/auth-store";
 
 export default function AccountPage() {
-  const { user, isLoading, refreshUser, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const { language } = useLanguage();
 
@@ -68,7 +68,6 @@ export default function AccountPage() {
     if (result.success) {
       setNameSuccess(true);
       setNewName("");
-      refreshUser?.();
       setTimeout(() => setNameSuccess(false), 3000);
     } else {
       setNameError(result.error || "Failed to update name");
@@ -102,7 +101,7 @@ export default function AccountPage() {
     setIsUpdatingPassword(false);
   };
 
-  const handleDeleteAccount = (e: React.FormEvent) => {
+  const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setDeleteError("");
 
@@ -111,7 +110,7 @@ export default function AccountPage() {
     setIsDeletingAccount(true);
     const result = deleteAccount();
     if (result.success) {
-      logout();
+      await logout();
       router.push("/");
     } else {
       setDeleteError(result.error || "Failed to delete account");
@@ -131,16 +130,8 @@ export default function AccountPage() {
     return null;
   }
 
-  const memberSince = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString(
-        language === "ko" ? "ko-KR" : "en-US",
-        {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        },
-      )
-    : "-";
+  // TODO: user API에서 createdAt을 가져와서 표시
+  const memberSince = "-";
 
   return (
     <main className="min-h-screen bg-background">

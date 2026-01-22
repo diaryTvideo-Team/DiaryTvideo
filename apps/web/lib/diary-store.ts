@@ -1,4 +1,13 @@
-import { DiaryEntry } from "@repo/types";
+// TODO: DiaryEntry 타입을 @repo/types에서 가져오도록 수정 (Diary API 구현 시)
+export interface DiaryEntry {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  thumbnailUrl?: string;
+  videoUrl?: string;
+  subtitleUrl?: string;
+}
 
 // TODO: Replace with actual API call to GET /api/diary
 export function getEntries(): DiaryEntry[] {

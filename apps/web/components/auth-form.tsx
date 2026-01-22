@@ -9,17 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  login,
-  register,
-  sendVerificationCode,
-  verifyCode,
-  resendVerificationCode,
-  sendPasswordResetEmail,
-  resendPasswordResetEmail,
+  verifyEmail,
+  resendVerification,
+  forgotPassword,
+  signup,
+  signin,
 } from "@/lib/auth-store";
 import { useAuth } from "@/components/auth-provider";
 import { useLanguage } from "./language-toggle";
 import { translations } from "@/lib/translations";
+import { SignupRequestSchema } from "@repo/types";
+import { parseI18nMessage, ApiError } from "@/lib/api";
 
 interface AuthFormProps {
   mode: "login" | "register" | "verify" | "forgot-password";
@@ -28,7 +28,7 @@ interface AuthFormProps {
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { refreshUser } = useAuth();
+  const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -87,52 +87,42 @@ export function AuthForm({ mode }: AuthFormProps) {
     setIsLoading(true);
 
     if (mode === "verify") {
-      // const code = verificationCode.join("");
-      const result = verifyCode();
-      if (result.success) {
-        // Log user in after successful verification
-        const users = localStorage.getItem("diary_users");
-        if (users) {
-          const parsedUsers = JSON.parse(users);
-          const user = parsedUsers.find(
-            (u: { email: string }) =>
-              u.email.toLowerCase() === email.toLowerCase(),
-          );
-          if (user) {
-            const publicUser = {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              createdAt: user.createdAt,
-            };
-            localStorage.setItem(
-              "diary_current_user",
-              JSON.stringify(publicUser),
-            );
-            refreshUser();
-            router.push("/diary");
-          }
+      const code = verificationCode.join("");
+      try {
+        const response = await verifyEmail({ email, code });
+        if (response.data) {
+          setUser(response.data.user);
         }
-      } else {
-        setError(result.error || "Verification failed");
+        router.push("/diary");
+      } catch (error) {
+        const apiError = error as ApiError;
+        setError(apiError.message);
       }
     } else if (mode === "register") {
-      const result = register();
-      if (result.success) {
-        // Send verification code
-        sendVerificationCode();
-        // Redirect to verification page
-        router.push(`/verify?email=${encodeURIComponent(email)}`);
-      } else {
-        setError(result.error || "Registration failed");
+      const result = SignupRequestSchema.safeParse({ email, password, name });
+      if (!result.success) {
+        const firstError = result.error.issues[0];
+        setError(parseI18nMessage(firstError.message, language));
+        setIsLoading(false);
+        return;
       }
-    } else {
-      const result = login();
-      if (result.success) {
-        refreshUser();
+      try {
+        await signup({ email, password, name });
+        router.push(`/verify?email=${encodeURIComponent(email)}`);
+      } catch (error) {
+        const apiError = error as ApiError;
+        setError(apiError.message);
+      }
+    } else if (mode === "login") {
+      try {
+        const response = await signin({ email, password });
+        if (response.data) {
+          setUser(response.data.user);
+        }
         router.push("/diary");
-      } else {
-        setError(result.error || "Login failed");
+      } catch (error) {
+        const apiError = error as ApiError;
+        setError(apiError.message);
       }
     }
 
@@ -166,11 +156,15 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const handleResendCode = async () => {
     setIsResending(true);
-    resendVerificationCode();
     setError("");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await resendVerification(email);
+      alert(t.verificationCodeResent);
+    } catch (error) {
+      const apiError = error as ApiError;
+      setError(apiError.message);
+    }
     setIsResending(false);
-    alert(t.verificationCodeResent);
   };
 
   const handleSendPasswordResetEmail = async (e: React.FormEvent) => {
@@ -178,13 +172,14 @@ export function AuthForm({ mode }: AuthFormProps) {
     setError("");
     setIsLoading(true);
 
-    const result = sendPasswordResetEmail(email);
-    if (result.success) {
+    try {
+      await forgotPassword(email);
       setEmailSent(true);
       setResendTimer(60);
       setCanResend(false);
-    } else {
-      setError(result.error || "Failed to send reset email");
+    } catch (error) {
+      const apiError = error as ApiError;
+      setError(apiError.message);
     }
 
     setIsLoading(false);
@@ -194,13 +189,14 @@ export function AuthForm({ mode }: AuthFormProps) {
     if (!canResend) return;
 
     setIsResending(true);
-    const result = resendPasswordResetEmail(email);
-    if (result.success) {
+    try {
+      await forgotPassword(email);
       setResendTimer(60);
       setCanResend(false);
       alert(t.passwordResetEmailResent);
-    } else {
-      setError(result.error || "Failed to resend reset email");
+    } catch (error) {
+      const apiError = error as ApiError;
+      setError(apiError.message);
     }
     setIsResending(false);
   };
@@ -426,7 +422,6 @@ export function AuthForm({ mode }: AuthFormProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
               className="h-12"
             />
           </div>

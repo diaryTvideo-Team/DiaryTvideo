@@ -7,8 +7,8 @@ import { DiaryFilter } from "./diary-filter";
 import { DiaryCalendar } from "./diary-calendar";
 import { DiaryModal } from "./diary-modal";
 import { DeleteModal } from "./delete-modal";
-import { getEntries, deleteEntry } from "@/lib/diary-store";
-import { DiaryEntry, Language } from "@repo/types";
+import { getEntries, deleteEntry, DiaryEntry } from "@/lib/diary-store";
+import { Language } from "@repo/types";
 import { BookOpen } from "lucide-react";
 import { translations } from "@/lib/translations";
 

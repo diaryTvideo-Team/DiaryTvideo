@@ -122,6 +122,8 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     updatePassword: "Update Password",
     passwordUpdated: "Password updated successfully",
     passwordsDoNotMatch: "Passwords do not match",
+    passwordUppercaseRequired:
+      "Password must contain at least one uppercase letter",
     cancelMembership: "Cancel Membership",
     cancelMembershipWarning:
       "This action will permanently delete your account and all your diary entries. This cannot be undone.",
@@ -246,6 +248,7 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     updatePassword: "비밀번호 업데이트",
     passwordUpdated: "비밀번호가 성공적으로 업데이트되었습니다",
     passwordsDoNotMatch: "비밀번호가 일치하지 않습니다",
+    passwordUppercaseRequired: "비밀번호에 대문자가 최소 1개 포함되어야 합니다",
     cancelMembership: "회원 탈퇴",
     cancelMembershipWarning:
       "이 작업은 계정과 모든 일기를 영구적으로 삭제합니다. 되돌릴 수 없습니다.",

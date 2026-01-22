@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
@@ -8,22 +8,51 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { ResetPasswordForm } from "@/components/reset-password-form";
 import { ResetPasswordError } from "@/components/reset-password-error";
 import { COOMON_TRANSLATIONS } from "@/lib/translations";
+import { verifyResetToken } from "@/lib/auth-store";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorType, setErrorType] = useState<
+    "no-token" | "expired" | "invalid" | "already-used" | null
+  >(null);
 
-  // No token provided - show error
-  if (!token) {
-    return <ResetPasswordError type="no-token" />;
+  useEffect(() => {
+    async function validateToken() {
+      if (!token) {
+        setErrorType("no-token");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await verifyResetToken(token);
+        if (!response.data?.valid) {
+          setErrorType("invalid");
+        }
+      } catch {
+        setErrorType("invalid");
+      }
+      setIsLoading(false);
+    }
+
+    validateToken();
+  }, [token]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-md text-center text-muted-foreground">
+        Loading...
+      </div>
+    );
   }
 
-  // TODO: Add token validation logic here
-  // - Call API to validate token
-  // - Check if expired, invalid, or already used
-  // - For now, just show the form
+  if (errorType) {
+    return <ResetPasswordError type={errorType} />;
+  }
 
-  return <ResetPasswordForm token={token} />;
+  return <ResetPasswordForm token={token!} />;
 }
 
 export default function ResetPasswordPage() {

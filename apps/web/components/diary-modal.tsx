@@ -5,7 +5,8 @@ import { X, Calendar } from "lucide-react";
 import { useFormattedDate } from "@/lib/formattedDate";
 import { VideoPlayer } from "./video-player";
 import { DUMMY_VIDEO } from "@/lib/dummy-video";
-import { DiaryEntry, Language } from "@repo/types";
+import { Language } from "@repo/types";
+import { DiaryEntry } from "@/lib/diary-store";
 
 interface DiaryModalProps {
   entry: DiaryEntry | null;

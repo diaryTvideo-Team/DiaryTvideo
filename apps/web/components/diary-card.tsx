@@ -3,7 +3,8 @@
 import { Play, Trash2, Calendar, Eye } from "lucide-react";
 import { useFormattedDate } from "@/lib/formattedDate";
 import { DUMMY_VIDEO } from "@/lib/dummy-video";
-import { DiaryEntry, Language } from "@repo/types";
+import { Language } from "@repo/types";
+import { DiaryEntry } from "@/lib/diary-store";
 
 interface DiaryCardProps {
   entry: DiaryEntry;

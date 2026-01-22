@@ -8,6 +8,7 @@ export const EmailSchema = z.email({
 
 export const NameSchema = z
   .string()
+  .trim()
   .min(1, AuthErrors.NAME_REQUIRED)
   .max(100, AuthErrors.NAME_TOO_LONG);
 

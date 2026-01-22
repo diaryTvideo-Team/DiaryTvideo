@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,12 +15,16 @@ import {
 } from "./ui/card";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "./language-toggle";
+import { resetPassword } from "@/lib/auth-store";
+import { ApiError, parseI18nMessage } from "@/lib/api";
+import { PasswordSchema } from "@repo/types";
 
 interface ResetPasswordFormProps {
   token: string;
 }
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const router = useRouter();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -34,30 +39,29 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     e.preventDefault();
     setError("");
 
-    // Client-side validation
     if (newPassword !== confirmPassword) {
       setError(t.passwordsDoNotMatch);
       return;
     }
 
-    if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters"); // TODO: Add to translations
+    const result = PasswordSchema.safeParse(newPassword);
+    if (!result.success) {
+      const firstError = result.error.issues[0];
+      setError(parseI18nMessage(firstError.message, language));
       return;
     }
 
     setIsLoading(true);
 
-    // TODO: API call to reset password
-    // const result = await resetPassword(token, newPassword);
+    try {
+      await resetPassword({ token, newPassword });
+      router.push("/login");
+    } catch (error) {
+      const apiError = error as ApiError;
+      setError(apiError.message);
+    }
 
-    console.log("Reset password with token:", token);
-    console.log("New password:", newPassword);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // TODO: Redirect to login on success
-    }, 1000);
+    setIsLoading(false);
   };
 
   return (
