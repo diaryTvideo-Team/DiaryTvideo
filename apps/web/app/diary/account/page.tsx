@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -28,11 +28,18 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle, useLanguage } from "@/components/language-toggle";
 import { translations } from "@/lib/translations";
 import { updateName, updatePassword, deleteAccount } from "@/lib/auth-store";
+import { getMe } from "@/lib/user-store";
+import { ApiError } from "@/lib/api";
+import { UserData } from "@repo/types";
 
 export default function AccountPage() {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const { language } = useLanguage();
+
+  // Profile state
+  const [userProfile, setUserProfile] = useState<UserData | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   // Name change state
   const [newName, setNewName] = useState("");
@@ -55,6 +62,27 @@ export default function AccountPage() {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const t = translations[language];
+
+  // Fetch user profile on mount
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const response = await getMe();
+        if (response.data) {
+          setUserProfile(response.data);
+        }
+      } catch (error) {
+        const apiError = error as ApiError;
+        console.error("Failed to fetch profile:", apiError.message);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
 
   const handleNameChange = (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,8 +158,15 @@ export default function AccountPage() {
     return null;
   }
 
-  // TODO: user API에서 createdAt을 가져와서 표시
-  const memberSince = "-";
+  // Format memberSince date
+  const formatDate = (date: Date | string) => {
+    const d = new Date(date);
+    return d.toLocaleDateString(language === "ko" ? "ko-KR" : "en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <main className="min-h-screen bg-background">
@@ -177,7 +212,15 @@ export default function AccountPage() {
                   <p className="text-sm text-muted-foreground">
                     {t.memberSince}
                   </p>
-                  <p className="font-medium">{memberSince}</p>
+                  {isLoadingProfile ? (
+                    <div className="h-5 w-24 animate-pulse bg-muted rounded" />
+                  ) : (
+                    <p className="font-medium">
+                      {userProfile?.createdAt
+                        ? formatDate(userProfile.createdAt)
+                        : "-"}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
