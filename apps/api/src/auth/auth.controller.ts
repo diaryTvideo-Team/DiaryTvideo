@@ -7,6 +7,7 @@ import {
   Get,
   Query,
 } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { AuthService } from "./auth.service";
 import {
   ApiResponse,
@@ -38,6 +39,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post("signup")
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UsePipes(new ZodValidationPipe(SignupRequestSchema))
   async signup(@Body() data: SignupRequest): Promise<ApiResponse> {
     return this.authService.signup(data);
@@ -52,11 +54,13 @@ export class AuthController {
   }
 
   @Post("resend-verification")
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   async resendVerification(@Body("email") email: string): Promise<ApiResponse> {
     return this.authService.resendVerificationEmail(email);
   }
 
   @Post("signin")
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @UsePipes(new ZodValidationPipe(LoginRequestSchema))
   async signin(@Body() data: LoginRequest): Promise<ApiResponse<AuthData>> {
     return this.authService.signin(data);
@@ -69,6 +73,7 @@ export class AuthController {
   }
 
   @Post("forgot-password")
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UsePipes(new ZodValidationPipe(ForgotPasswordRequestSchema))
   async forgotPassword(
     @Body() data: ForgotPasswordRequest,
