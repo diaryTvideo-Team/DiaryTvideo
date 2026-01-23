@@ -36,23 +36,6 @@ export async function logout(): Promise<void> {
   }
 }
 
-export function updateName(): { success: boolean; error?: string } {
-  console.warn("updateName: API not implemented yet");
-  return { success: false, error: "API not implemented" };
-}
-
-// TODO: Replace with actual API call to PATCH /api/user/password
-export function updatePassword(): { success: boolean; error?: string } {
-  console.warn("updatePassword: API not implemented yet");
-  return { success: false, error: "API not implemented" };
-}
-
-// TODO: Replace with actual API call to DELETE /api/user
-export function deleteAccount(): { success: boolean; error?: string } {
-  console.warn("deleteAccount: API not implemented yet");
-  return { success: false, error: "API not implemented" };
-}
-
 export async function verifyEmail(
   data: VerifyEmailRequest,
 ): Promise<ApiResponse<AuthData>> {

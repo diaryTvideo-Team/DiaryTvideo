@@ -27,13 +27,17 @@ import { useAuth } from "@/components/auth-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle, useLanguage } from "@/components/language-toggle";
 import { translations } from "@/lib/translations";
-import { updateName, updatePassword, deleteAccount } from "@/lib/auth-store";
-import { getMe } from "@/lib/user-store";
+import {
+  getMe,
+  updateName,
+  updatePassword,
+  deleteAccount,
+} from "@/lib/user-store";
 import { ApiError } from "@/lib/api";
 import { UserData } from "@repo/types";
 
 export default function AccountPage() {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, setUser } = useAuth();
   const router = useRouter();
   const { language } = useLanguage();
 
@@ -84,7 +88,7 @@ export default function AccountPage() {
     }
   }, [user]);
 
-  const handleNameChange = (e: React.FormEvent) => {
+  const handleNameChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setNameError("");
     setNameSuccess(false);
@@ -92,18 +96,24 @@ export default function AccountPage() {
     if (!user || !newName.trim()) return;
 
     setIsUpdatingName(true);
-    const result = updateName();
-    if (result.success) {
-      setNameSuccess(true);
-      setNewName("");
-      setTimeout(() => setNameSuccess(false), 3000);
-    } else {
-      setNameError(result.error || "Failed to update name");
+    try {
+      const response = await updateName({ name: newName.trim() });
+      if (response.success && response.data) {
+        setNameSuccess(true);
+        setNewName("");
+        setUserProfile(response.data);
+        setUser({ ...user, name: response.data.name });
+        setTimeout(() => setNameSuccess(false), 3000);
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+      setNameError(apiError.message);
+    } finally {
+      setIsUpdatingName(false);
     }
-    setIsUpdatingName(false);
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError("");
     setPasswordSuccess(false);
@@ -116,17 +126,24 @@ export default function AccountPage() {
     }
 
     setIsUpdatingPassword(true);
-    const result = updatePassword();
-    if (result.success) {
-      setPasswordSuccess(true);
-      setCurrentPassword("");
-      setNewPasswordValue("");
-      setConfirmPassword("");
-      setTimeout(() => setPasswordSuccess(false), 3000);
-    } else {
-      setPasswordError(result.error || "Failed to update password");
+    try {
+      const response = await updatePassword({
+        currentPassword,
+        newPassword: newPasswordValue,
+      });
+      if (response.success) {
+        setPasswordSuccess(true);
+        setCurrentPassword("");
+        setNewPasswordValue("");
+        setConfirmPassword("");
+        setTimeout(() => setPasswordSuccess(false), 3000);
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+      setPasswordError(apiError.message);
+    } finally {
+      setIsUpdatingPassword(false);
     }
-    setIsUpdatingPassword(false);
   };
 
   const handleDeleteAccount = async (e: React.FormEvent) => {
@@ -136,12 +153,16 @@ export default function AccountPage() {
     if (!user) return;
 
     setIsDeletingAccount(true);
-    const result = deleteAccount();
-    if (result.success) {
-      await logout();
-      router.push("/");
-    } else {
-      setDeleteError(result.error || "Failed to delete account");
+    try {
+      const response = await deleteAccount({ password: deletePassword });
+      if (response.success) {
+        await logout();
+        router.push("/");
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+      setDeleteError(apiError.message);
+    } finally {
       setIsDeletingAccount(false);
     }
   };
