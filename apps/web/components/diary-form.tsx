@@ -4,7 +4,8 @@ import type React from "react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveEntry } from "@/lib/diary-store";
+import { createEntry } from "@/lib/diary-store";
+import { ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -16,17 +17,27 @@ export function DiaryForm() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const { language } = useLanguage();
 
   const t = translations[language];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
 
+    setError("");
     setIsSubmitting(true);
-    saveEntry();
-    router.push("/diary");
+
+    try {
+      await createEntry({ title: title.trim(), content: content.trim() });
+      router.push("/diary");
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,6 +91,10 @@ export function DiaryForm() {
           />
         </div>
       </div>
+
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>
+      )}
 
       <div className="flex justify-end gap-3">
         <Button

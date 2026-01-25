@@ -2,12 +2,14 @@ import { z } from "zod";
 
 // VideoStatus enum
 // DB에 사용된 VideoStatus와 동일하게 유지해야 합니다.
-const VideoStatusSchema = z.enum([
+export const VideoStatusSchema = z.enum([
   "PENDING",
   "PROCESSING",
   "COMPLETED",
   "FAILED",
 ]);
+
+export type VideoStatus = z.infer<typeof VideoStatusSchema>;
 
 // VideoJobData 스키마
 export const VideoJobDataSchema = z.object({

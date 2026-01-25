@@ -45,13 +45,14 @@ export class DiaryService {
   ): Promise<ApiResponse<DiaryData>> {
     const diary = await this.diaryRepository.create({ userId, ...data });
 
+    // TODO: 테스트 후 주석 해제
     // 2. 비디오 생성 작업 큐에 등록 (비동기, non-blocking)
-    await this.videoProducer.addVideoGenerationJob({
-      diaryId: diary.id,
-      userId,
-      title: data.title,
-      content: data.content,
-    });
+    // await this.videoProducer.addVideoGenerationJob({
+    //   diaryId: diary.id,
+    //   userId,
+    //   title: data.title,
+    //   content: data.content,
+    // });
 
     return { success: true, data: toDiaryData(diary) };
   }

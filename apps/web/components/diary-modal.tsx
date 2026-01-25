@@ -4,15 +4,16 @@ import { useEffect, useState } from "react";
 import { X, Calendar } from "lucide-react";
 import { useFormattedDate } from "@/lib/formattedDate";
 import { VideoPlayer } from "./video-player";
+import { VideoStatusPlaceholder } from "./video-status-placeholder";
 import { DUMMY_VIDEO } from "@/lib/dummy-video";
-import { Language } from "@repo/types";
-import { DiaryEntry } from "@/lib/diary-store";
+import { DiaryData, Language } from "@repo/types";
 
 interface DiaryModalProps {
-  entry: DiaryEntry | null;
+  entry: DiaryData | null;
   onClose: () => void;
   language: Language;
   view: "video" | "text";
+  onRetry?: (entryId: string) => void;
 }
 
 export function DiaryModal({
@@ -20,6 +21,7 @@ export function DiaryModal({
   onClose,
   language,
   view,
+  onRetry,
 }: DiaryModalProps) {
   const [showFullContent, setShowFullContent] = useState(false);
   const formattedDate = useFormattedDate({ entry, language });
@@ -71,15 +73,28 @@ export function DiaryModal({
           className="overflow-y-auto p-6"
           style={{ maxHeight: "calc(85vh - 73px)" }}
         >
-          {/* Video Player */}
-          {view === "video" && (entry.videoUrl || DUMMY_VIDEO.videoUrl) && (
+          {/* Video Player or Status Placeholder */}
+          {view === "video" && (
             <div className="mb-6">
-              <VideoPlayer
-                videoUrl={entry.videoUrl || DUMMY_VIDEO.videoUrl}
-                thumbnailUrl={entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl}
-                subtitleUrl={entry.subtitleUrl || DUMMY_VIDEO.subtitleUrl}
-                language={language}
-              />
+              {entry.videoStatus === "COMPLETED" ? (
+                <VideoPlayer
+                  videoUrl={entry.videoUrl || DUMMY_VIDEO.videoUrl}
+                  thumbnailUrl={entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl}
+                  subtitleUrl={entry.subtitleUrl || DUMMY_VIDEO.subtitleUrl}
+                  language={language}
+                />
+              ) : (
+                <VideoStatusPlaceholder
+                  status={entry.videoStatus}
+                  thumbnailUrl={entry.thumbnailUrl}
+                  language={language}
+                  onRetry={
+                    entry.videoStatus === "FAILED" && onRetry
+                      ? () => onRetry(entry.id)
+                      : undefined
+                  }
+                />
+              )}
             </div>
           )}
 

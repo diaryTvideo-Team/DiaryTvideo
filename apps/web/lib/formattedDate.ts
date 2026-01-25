@@ -1,22 +1,23 @@
-import { Language } from "@repo/types";
-import { DiaryEntry } from "@/lib/diary-store";
+import { DiaryData, Language } from "@repo/types";
 
 interface FormattedDateProps {
-  entry: DiaryEntry | null;
+  entry: DiaryData | null;
   language: Language;
 }
 
 export function useFormattedDate({ entry, language }: FormattedDateProps) {
   if (!entry) return null;
 
-  const formattedDate_en = entry.createdAt.toLocaleDateString("en-US", {
+  const date = new Date(entry.createdAt);
+
+  const formattedDate_en = date.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
-  const formattedDate_ko = entry.createdAt.toLocaleDateString("ko-KR", {
+  const formattedDate_ko = date.toLocaleDateString("ko-KR", {
     weekday: "long",
     year: "numeric",
     month: "long",

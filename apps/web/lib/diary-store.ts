@@ -1,30 +1,24 @@
-// TODO: DiaryEntry 타입을 @repo/types에서 가져오도록 수정 (Diary API 구현 시)
-export interface DiaryEntry {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: Date;
-  thumbnailUrl?: string;
-  videoUrl?: string;
-  subtitleUrl?: string;
+"use client";
+
+import { ApiResponse, DiaryData, CreateDiaryRequest } from "@repo/types";
+import { api } from "./api";
+
+// 날짜별 다이어리 목록 조회
+export async function getEntries(
+  filterDate: string,
+): Promise<ApiResponse<DiaryData[]>> {
+  return api.get<ApiResponse<DiaryData[]>>(`/diary?filterDate=${filterDate}`, {
+    withAuth: true,
+  });
 }
 
-// TODO: Replace with actual API call to GET /api/diary
-export function getEntries(): DiaryEntry[] {
-  console.warn("getEntries: API not implemented yet");
-  return [];
-}
-
-// TODO: Replace with actual API call to POST /api/diary
-export function saveEntry(): DiaryEntry {
-  console.warn("saveEntry: API not implemented yet");
-  // Return a mock entry to maintain type compatibility
-  return {
-    id: "",
-    title: "",
-    content: "",
-    createdAt: new Date(),
-  };
+// 다이어리 생성
+export async function createEntry(
+  data: CreateDiaryRequest,
+): Promise<ApiResponse<DiaryData>> {
+  return api.post<ApiResponse<DiaryData>>("/diary", data, {
+    withAuth: true,
+  });
 }
 
 // TODO: Replace with actual API call to DELETE /api/diary/:id

@@ -99,6 +99,8 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     filtered: "filtered",
     noEntriesMatch: "No entries match your criteria.",
     clearAllFilters: "Clear All Filters",
+    failedToLoadEntries: "Failed to load entries",
+    tryAgain: "Try again",
     deleteEntryTitle: "Delete Entry",
     deleteEntryMessage:
       "Are you sure you want to delete this entry? This action cannot be undone.",
@@ -135,6 +137,18 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     developedBy: COOMON_TRANSLATIONS.developedBy,
     poweredBy: COOMON_TRANSLATIONS.poweredBy,
     contact: COOMON_TRANSLATIONS.contact,
+
+    // Video Status
+    videoStatusPending: "Pending",
+    videoStatusProcessing: "Generating",
+    videoStatusCompleted: "AI Generated",
+    videoStatusFailed: "Failed",
+    videoStatusPendingTitle: "Waiting to generate video",
+    videoStatusPendingSubtitle: "Please wait a moment",
+    videoStatusProcessingTitle: "Generating your video",
+    videoStatusProcessingSubtitle: "We'll let you know when it's done",
+    videoStatusFailedTitle: "Video generation failed",
+    videoStatusRetry: "Retry",
   },
   ko: {
     // Navigation
@@ -225,6 +239,8 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     filtered: "필터링됨",
     noEntriesMatch: "조건에 맞는 일기가 없습니다.",
     clearAllFilters: "모든 필터 지우기",
+    failedToLoadEntries: "일기를 불러올 수 없습니다",
+    tryAgain: "다시 시도",
     deleteEntryTitle: "일기 삭제",
     deleteEntryMessage:
       "정말로 이 일기를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
@@ -260,5 +276,17 @@ export const translations: { [key in Language]: { [key: string]: string } } = {
     developedBy: COOMON_TRANSLATIONS.developedBy,
     poweredBy: COOMON_TRANSLATIONS.poweredBy,
     contact: COOMON_TRANSLATIONS.contact,
+
+    // Video Status
+    videoStatusPending: "대기 중",
+    videoStatusProcessing: "생성 중",
+    videoStatusCompleted: "AI 생성됨",
+    videoStatusFailed: "실패",
+    videoStatusPendingTitle: "영상을 생성하기 위해 대기 중입니다",
+    videoStatusPendingSubtitle: "잠시만 기다려 주세요",
+    videoStatusProcessingTitle: "영상을 생성하고 있습니다",
+    videoStatusProcessingSubtitle: "완료되면 알려드릴게요",
+    videoStatusFailedTitle: "영상 생성에 실패했습니다",
+    videoStatusRetry: "다시 시도",
   },
 } as const;
