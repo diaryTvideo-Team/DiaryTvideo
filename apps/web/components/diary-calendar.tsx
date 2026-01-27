@@ -9,6 +9,8 @@ interface DiaryCalendarProps {
   entryDates: Date[];
   selectedDate: Date | null;
   onSelectDate: (date: Date | null) => void;
+  onMonthChange?: (year: number, month: number) => void;
+  isLoading?: boolean;
   language: Language;
 }
 
@@ -16,6 +18,8 @@ export function DiaryCalendar({
   entryDates,
   selectedDate,
   onSelectDate,
+  onMonthChange,
+  isLoading = false,
   language,
 }: DiaryCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -69,15 +73,23 @@ export function DiaryCalendar({
   const dayNames = language === "ko" ? dayNames_ko : dayNames_en;
 
   const prevMonth = () => {
-    setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1),
+    const newMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth() - 1,
+      1,
     );
+    setCurrentMonth(newMonth);
+    onMonthChange?.(newMonth.getFullYear(), newMonth.getMonth() + 1);
   };
 
   const nextMonth = () => {
-    setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
+    const newMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth() + 1,
+      1,
     );
+    setCurrentMonth(newMonth);
+    onMonthChange?.(newMonth.getFullYear(), newMonth.getMonth() + 1);
   };
 
   const hasEntry = (day: number) => {
@@ -145,21 +157,34 @@ export function DiaryCalendar({
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
-        {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-          <div key={`empty-${i}`} />
-        ))}
-        {Array.from({ length: daysInMonth }).map((_, i) => {
-          const day = i + 1;
-          const hasEntryOnDay = hasEntry(day);
-          const isSelectedDay = isSelected(day);
-          const isTodayDay = isToday(day);
+      <div className="relative">
+        {/* 로딩 오버레이 */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-card/50 backdrop-blur-[2px] rounded-lg flex items-center justify-center z-10">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs text-muted-foreground">
+                {language === "ko" ? "불러오는 중..." : "Loading..."}
+              </span>
+            </div>
+          </div>
+        )}
 
-          return (
-            <button
-              key={day}
-              onClick={() => handleDayClick(day)}
-              className={`
+        <div className="grid grid-cols-7 gap-1">
+          {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+            <div key={`empty-${i}`} />
+          ))}
+          {Array.from({ length: daysInMonth }).map((_, i) => {
+            const day = i + 1;
+            const hasEntryOnDay = hasEntry(day);
+            const isSelectedDay = isSelected(day);
+            const isTodayDay = isToday(day);
+
+            return (
+              <button
+                key={day}
+                onClick={() => handleDayClick(day)}
+                className={`
                 relative aspect-square flex items-center justify-center text-sm rounded-lg
                 transition-colors
                 ${
@@ -171,14 +196,15 @@ export function DiaryCalendar({
                 }
                 ${isTodayDay && !isSelectedDay ? "ring-1 ring-primary" : ""}
               `}
-            >
-              {day}
-              {hasEntryOnDay && !isSelectedDay && (
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-              )}
-            </button>
-          );
-        })}
+              >
+                {day}
+                {hasEntryOnDay && !isSelectedDay && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {selectedDate && (

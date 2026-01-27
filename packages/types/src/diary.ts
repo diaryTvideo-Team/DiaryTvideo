@@ -5,10 +5,18 @@ import { DiaryErrors } from "./diaryErrors";
 export const CreateDiaryRequestSchema = z.object({
   title: z.string().min(1, DiaryErrors.DIARY_TITLE_REQUIRED),
   content: z.string().min(1, DiaryErrors.DIARY_CONTENT_REQUIRED),
+  localDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, DiaryErrors.DIARY_DATE_INVALID),
 });
 
 export const GetDiaryQuerySchema = z.object({
   filterDate: z.iso.date(),
+});
+
+export const GetMonthlyDiaryQuerySchema = z.object({
+  year: z.coerce.number().int().min(1900).max(2100),
+  month: z.coerce.number().int().min(1).max(12),
 });
 
 export const DeleteDiaryParamsSchema = z.object({
@@ -18,4 +26,7 @@ export const DeleteDiaryParamsSchema = z.object({
 // 타입 추출
 export type CreateDiaryRequest = z.infer<typeof CreateDiaryRequestSchema>;
 export type GetDiaryQueryRequest = z.infer<typeof GetDiaryQuerySchema>;
+export type GetMonthlyDiaryQueryRequest = z.infer<
+  typeof GetMonthlyDiaryQuerySchema
+>;
 export type DeleteDiaryParams = z.infer<typeof DeleteDiaryParamsSchema>;

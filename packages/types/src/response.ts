@@ -59,6 +59,7 @@ export const DiaryDataSchema = z.object({
   userId: z.number(),
   title: z.string(),
   content: z.string(),
+  localDate: z.string(),
   videoUrl: z.string().nullable(),
   thumbnailUrl: z.string().nullable(),
   subtitleUrl: z.string().nullable(),

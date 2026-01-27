@@ -24,7 +24,11 @@ export function DiaryModal({
   onRetry,
 }: DiaryModalProps) {
   const [showFullContent, setShowFullContent] = useState(false);
-  const formattedDate = useFormattedDate({ entry, language });
+  const formattedDate = useFormattedDate({
+    entry,
+    language,
+    includeTime: true,
+  });
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {

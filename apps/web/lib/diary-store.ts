@@ -12,6 +12,17 @@ export async function getEntries(
   });
 }
 
+// 월별 다이어리 목록 조회
+export async function getMonthlyEntries(
+  year: number,
+  month: number,
+): Promise<ApiResponse<DiaryData[]>> {
+  return api.get<ApiResponse<DiaryData[]>>(
+    `/diary/monthly?year=${year}&month=${month}`,
+    { withAuth: true }
+  );
+}
+
 // 다이어리 생성
 export async function createEntry(
   data: CreateDiaryRequest,

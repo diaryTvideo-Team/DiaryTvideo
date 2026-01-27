@@ -7,15 +7,34 @@ export class DiaryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   // 일기 목록 조회 (날짜 필터링)
-  async findByUserId(userId: number, startOfDay: Date, endOfDay: Date) {
+  async findByUserId(userId: number, localDate: string) {
     return this.prisma.diaryEntry.findMany({
       where: {
         userId,
+        localDate,
         deletedAt: null,
-        createdAt: {
-          gte: startOfDay,
-          lte: endOfDay,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  // 월별 일기 목록 조회
+  async findByUserIdAndMonth(userId: number, year: number, month: number) {
+    // 해당 월의 첫날과 마지막 날 계산
+    const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+
+    // 해당 월의 마지막 날 계산 (다음 달 0일 = 이번 달 마지막 날)
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+
+    return this.prisma.diaryEntry.findMany({
+      where: {
+        userId,
+        localDate: {
+          gte: startDate, // greater than or equal
+          lte: endDate, // less than or equal
         },
+        deletedAt: null,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -29,7 +48,12 @@ export class DiaryRepository {
   }
 
   // 일기 생성
-  async create(data: { userId: number; title: string; content: string }) {
+  async create(data: {
+    userId: number;
+    title: string;
+    content: string;
+    localDate: string;
+  }) {
     return this.prisma.diaryEntry.create({ data });
   }
 

@@ -6,6 +6,7 @@ export const toDiaryData = (diary: DiaryEntry): DiaryData => ({
   userId: diary.userId,
   title: diary.title,
   content: diary.content,
+  localDate: diary.localDate,
   videoUrl: diary.videoUrl,
   thumbnailUrl: diary.thumbnailUrl,
   subtitleUrl: diary.subtitleUrl,

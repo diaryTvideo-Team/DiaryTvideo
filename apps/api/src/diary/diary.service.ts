@@ -25,15 +25,20 @@ export class DiaryService {
     userId: number,
     date: string,
   ): Promise<ApiResponse<DiaryData[]>> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const diaries = await this.diaryRepository.findByUserId(userId, date);
+    return { success: true, data: diaries.map(toDiaryData) };
+  }
 
-    const diaries = await this.diaryRepository.findByUserId(
+  // 월별 일기 목록 조회
+  async getEntriesByMonth(
+    userId: number,
+    year: number,
+    month: number,
+  ): Promise<ApiResponse<DiaryData[]>> {
+    const diaries = await this.diaryRepository.findByUserIdAndMonth(
       userId,
-      startOfDay,
-      endOfDay,
+      year,
+      month,
     );
     return { success: true, data: diaries.map(toDiaryData) };
   }

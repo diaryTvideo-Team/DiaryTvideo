@@ -47,11 +47,23 @@ model DiaryEntry {
   userId       Int       @map("user_id")
   title        String
   content      String    @db.Text
+
+  // 사용자가 일기를 작성한 날짜 (로컬 시간대 기준, YYYY-MM-DD 형식)
+  // 예: 사용자가 KST 2026-01-27 23:30에 작성했다면 "2026-01-27"
+  // 시간대 차이로 인한 날짜 불일치를 방지하기 위해 사용자의 로컬 날짜를 문자열로 저장
+  localDate    String    @map("local_date")
+
   videoUrl     String?   @map("video_url")
   thumbnailUrl String?   @map("thumbnail_url")
   subtitleUrl  String?   @map("subtitle_url")
+
+  // 일기가 생성된 정확한 시각 (UTC 기준 타임스탬프)
+  // 예: KST 2026-01-27 23:30 = UTC 2026-01-27 14:30
   createdAt    DateTime  @default(now()) @map("created_at")
+
+  // 일기가 수정된 시각 (UTC 기준 타임스탬프, 자동 업데이트)
   updatedAt    DateTime  @updatedAt @map("updated_at")
+
   deletedAt    DateTime? @map("deleted_at")
   videoStatus  VideoStatus  @default(PENDING) @map("video_status")
   videoError   String?      @map("video_error") @db.Text
@@ -61,6 +73,7 @@ model DiaryEntry {
   @@index([videoStatus])
   @@index([userId])
   @@index([createdAt])
+  @@index([userId, localDate])
   @@map("diary_entries")
 }
 

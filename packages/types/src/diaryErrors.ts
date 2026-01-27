@@ -19,4 +19,8 @@ export const DiaryErrors = {
     en: "You can only delete your own diary",
     ko: "자신의 일기만 삭제할 수 있습니다.",
   }),
+  DIARY_DATE_INVALID: i18nMessage({
+    en: "Invalid diary date",
+    ko: "유효하지 않은 일기 날짜입니다.",
+  }),
 } as const;

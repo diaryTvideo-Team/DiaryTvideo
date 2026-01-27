@@ -30,7 +30,17 @@ export function DiaryForm() {
     setIsSubmitting(true);
 
     try {
-      await createEntry({ title: title.trim(), content: content.trim() });
+      // 사용자의 로컬 시간대 기준으로 현재 날짜 생성 (예: KST 기준)
+      // new Date()는 브라우저의 시간대를 사용하며,
+      // getFullYear(), getMonth(), getDate()는 로컬 시간대 기준 값을 반환합니다.
+      const now = new Date();
+      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+      await createEntry({
+        title: title.trim(),
+        content: content.trim(),
+        localDate,
+      });
       router.push("/diary");
     } catch (err) {
       const apiError = err as ApiError;

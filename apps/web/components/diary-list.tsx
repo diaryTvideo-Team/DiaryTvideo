@@ -7,7 +7,7 @@ import { DiaryFilter } from "./diary-filter";
 import { DiaryCalendar } from "./diary-calendar";
 import { DiaryModal } from "./diary-modal";
 import { DeleteModal } from "./delete-modal";
-import { getEntries, deleteEntry } from "@/lib/diary-store";
+import { getEntries, getMonthlyEntries, deleteEntry } from "@/lib/diary-store";
 import { useVideoStatusUpdates } from "@/lib/socket";
 import { DiaryData, Language } from "@repo/types";
 import { ApiError } from "@/lib/api";
@@ -18,11 +18,17 @@ const SEEN_JOBS_KEY = "diary_seen_video_jobs";
 
 export function DiaryList({ language = "en" }: { language?: Language }) {
   const [entries, setEntries] = useState<DiaryData[]>([]);
+  const [monthlyEntries, setMonthlyEntries] = useState<DiaryData[]>([]);
   const [view, setView] = useState<"video" | "text">("text");
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMonthly, setIsLoadingMonthly] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() + 1 };
+  });
   const [selectedEntry, setSelectedEntry] = useState<DiaryData | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
@@ -45,10 +51,40 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
     }
   }, []);
 
+  // 월별 일기 조회 (달력 표시용)
+  useEffect(() => {
+    async function fetchMonthlyEntries() {
+      setIsLoadingMonthly(true);
+
+      try {
+        const response = await getMonthlyEntries(
+          currentMonth.year,
+          currentMonth.month,
+        );
+        if (response.data) {
+          setMonthlyEntries(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch monthly entries:", err);
+        // 에러 시 빈 배열로 설정 (달력은 계속 표시)
+        setMonthlyEntries([]);
+      } finally {
+        setIsLoadingMonthly(false);
+      }
+    }
+
+    fetchMonthlyEntries();
+  }, [currentMonth]);
+
   useEffect(() => {
     async function fetchEntries() {
       const targetDate = selectedDate || new Date();
-      const filterDate = targetDate.toISOString().split("T")[0]; // YYYY-MM-DD
+
+      // 로컬 시간 기준으로 YYYY-MM-DD 생성
+      const year = targetDate.getFullYear();
+      const month = String(targetDate.getMonth() + 1).padStart(2, "0");
+      const day = String(targetDate.getDate()).padStart(2, "0");
+      const filterDate = `${year}-${month}-${day}`;
 
       setIsLoading(true);
       setError(null);
@@ -124,24 +160,31 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
   );
 
   const entryDates = useMemo(() => {
-    return entries.map((entry) => new Date(entry.createdAt));
-  }, [entries]);
+    // monthlyEntries 사용 (기존 entries 대신)
+    return monthlyEntries.map((entry) => {
+      // localDate는 "YYYY-MM-DD" 형식 문자열 (사용자가 작성한 날짜)
+      // createdAt 대신 localDate를 사용하여 시간대 차이로 인한 날짜 불일치 방지
+      const [year, month, day] = entry.localDate.split("-").map(Number);
+      // 로컬 시간대 기준으로 Date 생성 (00:00:00)
+      return new Date(year, month - 1, day);
+    });
+  }, [monthlyEntries]);
+
+  const handleMonthChange = useCallback((year: number, month: number) => {
+    setCurrentMonth({ year, month });
+  }, []);
 
   const filteredEntries = useMemo(() => {
+    // API에서 이미 날짜별로 필터링된 데이터가 오므로 검색어만 필터링
     return entries.filter((entry) => {
       const matchesSearch =
         searchQuery === "" ||
         entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entry.content.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesDate =
-        !selectedDate ||
-        new Date(entry.createdAt).toDateString() ===
-          selectedDate.toDateString();
-
-      return matchesSearch && matchesDate;
+      return matchesSearch;
     });
-  }, [entries, searchQuery, selectedDate]);
+  }, [entries, searchQuery]);
 
   if (isLoading) {
     return (
@@ -152,6 +195,8 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
               entryDates={[]}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
+              onMonthChange={handleMonthChange}
+              isLoading={isLoadingMonthly}
               language={language}
             />
           </div>
@@ -179,9 +224,11 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
         <aside className="lg:w-72 shrink-0">
           <div className="lg:sticky lg:top-8 space-y-4">
             <DiaryCalendar
-              entryDates={[]}
+              entryDates={entryDates}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
+              onMonthChange={handleMonthChange}
+              isLoading={isLoadingMonthly}
               language={language}
             />
           </div>
@@ -211,9 +258,11 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
         <aside className="lg:w-72 shrink-0">
           <div className="lg:sticky lg:top-8 space-y-4">
             <DiaryCalendar
-              entryDates={[]}
+              entryDates={entryDates}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
+              onMonthChange={handleMonthChange}
+              isLoading={isLoadingMonthly}
               language={language}
             />
           </div>
@@ -241,6 +290,8 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
               entryDates={entryDates}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
+              onMonthChange={handleMonthChange}
+              isLoading={isLoadingMonthly}
               language={language}
             />
           </div>

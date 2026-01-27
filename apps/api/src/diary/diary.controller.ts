@@ -17,6 +17,8 @@ import {
   JwtAccessPayload,
   GetDiaryQueryRequest,
   GetDiaryQuerySchema,
+  GetMonthlyDiaryQueryRequest,
+  GetMonthlyDiaryQuerySchema,
   CreateDiaryRequest,
   CreateDiaryRequestSchema,
   DeleteDiaryParamsSchema,
@@ -36,6 +38,19 @@ export class DiaryController {
     query: GetDiaryQueryRequest,
   ): Promise<ApiResponse<DiaryData[]>> {
     return this.diaryService.getEntries(user.sub, query.filterDate);
+  }
+
+  @Get("monthly")
+  async getEntriesByMonth(
+    @CurrentUser() user: JwtAccessPayload,
+    @Query(new ZodValidationPipe(GetMonthlyDiaryQuerySchema))
+    query: GetMonthlyDiaryQueryRequest,
+  ): Promise<ApiResponse<DiaryData[]>> {
+    return this.diaryService.getEntriesByMonth(
+      user.sub,
+      query.year,
+      query.month,
+    );
   }
 
   @Post()
