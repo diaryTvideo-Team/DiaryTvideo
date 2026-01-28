@@ -24,6 +24,10 @@ export const VideoProgressMessageSchema = z.object({
   diaryId: z.uuid(),
   status: VideoStatusSchema,
   message: z.string(),
+  // COMPLETED 시 URL 전송
+  videoUrl: z.string().optional(),
+  thumbnailUrl: z.string().optional(),
+  subtitleUrl: z.string().optional(),
 });
 
 // 타입 추출

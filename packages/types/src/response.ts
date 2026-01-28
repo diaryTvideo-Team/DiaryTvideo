@@ -68,6 +68,8 @@ export const DiaryDataSchema = z.object({
   deletedAt: z.date().nullable(),
   videoStatus: z.string(),
   videoError: z.string().nullable(),
+  videoMessage: z.string().nullable().optional(),
+  videoRetryCount: z.number().int().min(0).default(0),
 });
 
 export type AuthTokens = z.infer<typeof AuthTokensSchema>;

@@ -8,3 +8,4 @@ export * from "./response";
 export * from "./authErrors";
 export * from "./userErrors";
 export * from "./diaryErrors";
+export * from "./videoStatusMessages";
