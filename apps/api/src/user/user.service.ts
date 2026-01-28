@@ -32,7 +32,6 @@ export class UserService {
     userId: number,
     newName: string,
   ): Promise<ApiResponse<UserData>> {
-    console.log(userId, newName);
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new NotFoundException(UserErrors.USER_NOT_FOUND);

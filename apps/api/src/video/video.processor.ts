@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";
-import { VideoJobData } from "@repo/types";
+import { VideoJobData, VideoStatusMessages } from "@repo/types";
 import * as fs from "fs";
 import { DiaryRepository } from "../diary/diary.repository";
 import { S3Service } from "../storage/s3.service";
@@ -14,7 +14,9 @@ import { SubtitleService } from "./services/subtitle.service";
 import { FfmpegService } from "./services/ffmpeg.service";
 import { VideoStatus } from "@prisma/client";
 
-@Processor("video-generation")
+@Processor("video-generation", {
+  lockDuration: 20 * 60 * 1000, // 20분 - 긴 영상 처리를 위한 lock 유지
+})
 export class VideoProcessor extends WorkerHost {
   private readonly logger = new Logger(VideoProcessor.name);
 
@@ -36,26 +38,30 @@ export class VideoProcessor extends WorkerHost {
     const { diaryId, userId, title, content } = job.data;
     this.logger.log(`Processing video generation for diary: ${diaryId}`);
 
+    let failedMessage = VideoStatusMessages.FAILED;
+
     try {
       // 장면 분석 + 캐릭터 프로필 - GPT
+      failedMessage = VideoStatusMessages.FAILED_AT_SCENE_ANALYSIS;
       await this.diaryRepository.updateVideoStatus(
         diaryId,
         VideoStatus.PROCESSING,
       );
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
-        status: "PROCESSING",
-        message: "장면 분석 및 캐릭터 생성 중...",
+        status: VideoStatus.PROCESSING,
+        message: VideoStatusMessages.SCENE_ANALYSIS,
       });
 
       const { character, voice, scenes } =
         await this.sceneSplitter.splitIntoScenes(title, content);
 
       // TTS + 이미지 생성 (병렬 실행)
+      failedMessage = VideoStatusMessages.FAILED_AT_AUDIO_IMAGE;
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
-        status: "PROCESSING",
-        message: "음성 및 이미지 생성 중...",
+        status: VideoStatus.PROCESSING,
+        message: VideoStatusMessages.AUDIO_IMAGE_GENERATION,
       });
 
       const [audios, images] = await Promise.all([
@@ -64,28 +70,31 @@ export class VideoProcessor extends WorkerHost {
       ]);
 
       // Whisper 타임스탬프 추출
+      failedMessage = VideoStatusMessages.FAILED_AT_AUDIO_ANALYSIS;
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
-        status: "PROCESSING",
-        message: "음성 분석 중...",
+        status: VideoStatus.PROCESSING,
+        message: VideoStatusMessages.AUDIO_ANALYSIS,
       });
 
       const whisperResults = await this.whisperService.transcribeAll(audios);
 
       // 자막 생성 (Whisper 기반)
+      failedMessage = VideoStatusMessages.FAILED_AT_SUBTITLE;
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
-        status: "PROCESSING",
-        message: "자막 생성 중...",
+        status: VideoStatus.PROCESSING,
+        message: VideoStatusMessages.SUBTITLE_GENERATION,
       });
 
       const vtt = this.subtitleService.generateVttFromWhisper(whisperResults);
 
       // 영상 합성 - FFmpeg
+      failedMessage = VideoStatusMessages.FAILED_AT_VIDEO_COMPOSING;
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
-        status: "PROCESSING",
-        message: "영상 합성 중...",
+        status: VideoStatus.PROCESSING,
+        message: VideoStatusMessages.VIDEO_COMPOSING,
       });
 
       const durations = whisperResults.map((w) => w.duration);
@@ -97,14 +106,13 @@ export class VideoProcessor extends WorkerHost {
           vtt,
           durations,
         );
-      this.logger.log(`영상 합성 완료: ${videoPath}`);
-      this.logger.log(`자막 파일: ${subtitlePath}`);
 
       // S3 업로드
+      failedMessage = VideoStatusMessages.FAILED_AT_FILE_UPLOAD;
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
-        status: "PROCESSING",
-        message: "파일 업로드 중...",
+        status: VideoStatus.PROCESSING,
+        message: VideoStatusMessages.FILE_UPLOAD,
       });
 
       const [videoUrl, thumbnailUrl, subtitleUrl] = await Promise.all([
@@ -127,19 +135,19 @@ export class VideoProcessor extends WorkerHost {
 
       this.logger.log(`S3 업로드 완료: ${videoUrl}`);
 
-      // DB에 URL 저장
-      await this.diaryRepository.updateVideoUrls(diaryId, {
+      await this.diaryRepository.completeVideo(diaryId, {
         videoUrl,
         thumbnailUrl,
         subtitleUrl,
       });
 
-      // 완료
-      await this.diaryRepository.updateVideoStatus(diaryId, "COMPLETED");
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
-        status: "COMPLETED",
-        message: "완료!",
+        status: VideoStatus.COMPLETED,
+        message: VideoStatusMessages.COMPLETED,
+        videoUrl,
+        thumbnailUrl,
+        subtitleUrl,
       });
       this.logger.log(`Video generation completed for diary: ${diaryId}`);
     } catch (error) {
@@ -148,12 +156,12 @@ export class VideoProcessor extends WorkerHost {
       await this.diaryRepository.updateVideoStatus(
         diaryId,
         VideoStatus.FAILED,
-        "영상 생성에 실패했습니다.",
+        failedMessage,
       );
       this.videoGateway.sendVideoStatus(userId, {
         diaryId,
-        status: "FAILED",
-        message: "영상 생성에 실패했습니다.",
+        status: VideoStatus.FAILED,
+        message: failedMessage,
       });
 
       throw error;

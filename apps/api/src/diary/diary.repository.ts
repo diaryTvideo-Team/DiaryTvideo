@@ -43,7 +43,7 @@ export class DiaryRepository {
   // 일기 단건 조회
   async findById(id: string) {
     return this.prisma.diaryEntry.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
     });
   }
 
@@ -88,6 +88,32 @@ export class DiaryRepository {
     return this.prisma.diaryEntry.update({
       where: { id },
       data: urls,
+    });
+  }
+
+  // 비디오 재시도 상태 업데이트
+  async resetVideoForRetry(id: string) {
+    return this.prisma.diaryEntry.update({
+      where: { id },
+      data: {
+        videoStatus: VideoStatus.PENDING,
+        videoError: null,
+        videoRetryCount: { increment: 1 },
+      },
+    });
+  }
+
+  async completeVideo(
+    id: string,
+    urls: { videoUrl: string; thumbnailUrl: string; subtitleUrl: string },
+  ) {
+    return this.prisma.diaryEntry.update({
+      where: { id },
+      data: {
+        ...urls,
+        videoStatus: VideoStatus.COMPLETED,
+        videoError: null,
+      },
     });
   }
 }

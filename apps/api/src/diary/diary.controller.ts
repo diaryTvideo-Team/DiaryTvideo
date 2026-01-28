@@ -23,6 +23,8 @@ import {
   CreateDiaryRequestSchema,
   DeleteDiaryParamsSchema,
   DeleteDiaryParams,
+  RetryVideoDiaryParamsSchema,
+  RetryVideoDiaryParams,
 } from "@repo/types";
 import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
 
@@ -69,5 +71,14 @@ export class DiaryController {
     data: DeleteDiaryParams,
   ): Promise<ApiResponse<DiaryData>> {
     return this.diaryService.deleteEntry(user.sub, data.id);
+  }
+
+  @Post(":id/retry")
+  async retryVideoGeneration(
+    @CurrentUser() user: JwtAccessPayload,
+    @Param(new ZodValidationPipe(RetryVideoDiaryParamsSchema))
+    params: RetryVideoDiaryParams,
+  ): Promise<ApiResponse<DiaryData>> {
+    return this.diaryService.retryVideoGeneration(user.sub, params.id);
   }
 }

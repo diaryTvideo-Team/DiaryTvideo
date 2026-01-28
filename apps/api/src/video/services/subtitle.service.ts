@@ -16,20 +16,16 @@ export class SubtitleService {
     let offset = 0; // 누적 오프셋 (이전 장면들의 duration 합계)
 
     for (const result of whisperResults) {
-      let lastEndTime = 0;
-
       for (const segment of result.segments) {
         const startTime = this.formatTime(offset + segment.start);
         const endTime = this.formatTime(offset + segment.end);
 
         vtt += `${startTime} --> ${endTime}\n`;
         vtt += `${segment.text.trim()}\n\n`;
-
-        lastEndTime = segment.end;
       }
 
       // 다음 장면을 위해 오프셋 업데이트 (마지막 segment의 end 시간 기준)
-      offset += lastEndTime;
+      offset += result.duration;
     }
     return vtt;
   }

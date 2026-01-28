@@ -15,4 +15,5 @@ export const toDiaryData = (diary: DiaryEntry): DiaryData => ({
   deletedAt: diary.deletedAt,
   videoStatus: diary.videoStatus,
   videoError: diary.videoError,
+  videoRetryCount: diary.videoRetryCount,
 });

@@ -67,6 +67,7 @@ model DiaryEntry {
   deletedAt    DateTime? @map("deleted_at")
   videoStatus  VideoStatus  @default(PENDING) @map("video_status")
   videoError   String?      @map("video_error") @db.Text
+  videoRetryCount Int @default(0) @map("video_retry_count")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
