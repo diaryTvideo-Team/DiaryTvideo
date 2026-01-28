@@ -1,8 +1,8 @@
 "use client";
 
+import { memo } from "react";
 import { Trash2, Calendar, Eye } from "lucide-react";
 import { useFormattedDate } from "@/lib/formattedDate";
-import { DUMMY_VIDEO } from "@/lib/dummy-video";
 import { DiaryData, Language } from "@repo/types";
 import { VideoStatusIndicator } from "./video-status-indicator";
 
@@ -14,7 +14,7 @@ interface DiaryCardProps {
   language: Language;
 }
 
-export function DiaryCard({
+export const DiaryCard = memo(function DiaryCard({
   entry,
   view,
   onDelete,
@@ -31,9 +31,9 @@ export function DiaryCard({
           className="relative aspect-video w-full overflow-hidden"
         >
           {/* Thumbnail or gradient background */}
-          {entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl ? (
+          {entry.thumbnailUrl ? (
             <img
-              src={entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl}
+              src={entry.thumbnailUrl}
               alt={entry.title}
               className="w-full h-full object-cover blur-sm"
             />
@@ -46,6 +46,7 @@ export function DiaryCard({
             status={entry.videoStatus}
             variant="overlay"
             language={language}
+            message={entry.videoMessage ?? undefined}
           />
 
           {/* Status badge */}
@@ -53,6 +54,7 @@ export function DiaryCard({
             status={entry.videoStatus}
             variant="badge"
             language={language}
+            message={entry.videoMessage ?? undefined}
             className="absolute bottom-2 right-2"
           />
         </button>
@@ -130,7 +132,7 @@ export function DiaryCard({
       </button>
     </div>
   );
-}
+});
 
 export function DiaryCardSkeleton({ view }: { view: "video" | "text" }) {
   if (view === "video") {

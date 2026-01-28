@@ -23,15 +23,11 @@ export class ImageGeneratorService {
       throw new Error("이미지 생성 실패: 장면 데이터가 없습니다");
     }
 
-    const images: GeneratedImage[] = [];
-
-    for (const scene of scenes) {
-      const image = await this.generateSingleImageWithRetry(
-        scene,
-        characterProfile,
-      );
-      images.push(image);
-    }
+    const images = await Promise.all(
+      scenes.map((scene) =>
+        this.generateSingleImageWithRetry(scene, characterProfile),
+      ),
+    );
 
     return images;
   }

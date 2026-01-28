@@ -62,12 +62,9 @@ export class WhisperService {
   async transcribeAll(audios: GeneratedAudio[]): Promise<WhisperResult[]> {
     this.logger.log(`Transcribing ${audios.length} audio files`);
 
-    const results: WhisperResult[] = [];
-
-    for (const audio of audios) {
-      const result = await this.transcribe(audio.buffer, audio.scene);
-      results.push(result);
-    }
+    const results = await Promise.all(
+      audios.map((audio) => this.transcribe(audio.buffer, audio.scene)),
+    );
 
     return results;
   }

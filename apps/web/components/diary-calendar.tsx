@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Language } from "@repo/types";
 
 interface DiaryCalendarProps {
@@ -92,14 +92,18 @@ export function DiaryCalendar({
     onMonthChange?.(newMonth.getFullYear(), newMonth.getMonth() + 1);
   };
 
-  const hasEntry = (day: number) => {
-    return entryDates.some(
-      (date) =>
-        date.getDate() === day &&
-        date.getMonth() === currentMonth.getMonth() &&
-        date.getFullYear() === currentMonth.getFullYear(),
+  const entryDateSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const date of entryDates) {
+      set.add(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`);
+    }
+    return set;
+  }, [entryDates]);
+
+  const hasEntry = (day: number) =>
+    entryDateSet.has(
+      `${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${day}`,
     );
-  };
 
   const isSelected = (day: number) => {
     if (!selectedDate) return false;
