@@ -22,6 +22,12 @@ export function useVideoStatusUpdates(
                 videoStatus: data.status,
                 // FAILED 상태일 때 message를 videoError에 저장
                 videoError: data.status === "FAILED" ? data.message : null,
+                // 모든 상태에서 실시간 메시지 저장
+                videoMessage: data.message,
+                // COMPLETED 시 URL 업데이트
+                ...(data.videoUrl && { videoUrl: data.videoUrl }),
+                ...(data.thumbnailUrl && { thumbnailUrl: data.thumbnailUrl }),
+                ...(data.subtitleUrl && { subtitleUrl: data.subtitleUrl }),
               }
             : entry,
         ),

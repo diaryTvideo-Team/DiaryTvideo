@@ -7,7 +7,12 @@ import { DiaryFilter } from "./diary-filter";
 import { DiaryCalendar } from "./diary-calendar";
 import { DiaryModal } from "./diary-modal";
 import { DeleteModal } from "./delete-modal";
-import { getEntries, getMonthlyEntries, deleteEntry } from "@/lib/diary-store";
+import {
+  getEntries,
+  getMonthlyEntries,
+  deleteEntry,
+  retryVideoGeneration,
+} from "@/lib/diary-store";
 import { useVideoStatusUpdates } from "@/lib/socket";
 import { DiaryData, Language } from "@repo/types";
 import { ApiError } from "@/lib/api";
@@ -53,27 +58,32 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
 
   // 월별 일기 조회 (달력 표시용)
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchMonthlyEntries() {
       setIsLoadingMonthly(true);
-
       try {
         const response = await getMonthlyEntries(
           currentMonth.year,
           currentMonth.month,
         );
-        if (response.data) {
+        if (!cancelled && response.data) {
           setMonthlyEntries(response.data);
         }
       } catch (err) {
-        console.error("Failed to fetch monthly entries:", err);
-        // 에러 시 빈 배열로 설정 (달력은 계속 표시)
-        setMonthlyEntries([]);
+        if (!cancelled) {
+          console.error("Failed to fetch monthly entries:", err);
+          setMonthlyEntries([]);
+        }
       } finally {
-        setIsLoadingMonthly(false);
+        if (!cancelled) setIsLoadingMonthly(false);
       }
     }
 
     fetchMonthlyEntries();
+    return () => {
+      cancelled = true;
+    };
   }, [currentMonth]);
 
   useEffect(() => {
@@ -110,10 +120,24 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (entryToDelete) {
-      deleteEntry();
-      // TODO: deleteEntry API 연동 후 재조회 로직 구현
+  const confirmDelete = async () => {
+    if (!entryToDelete) return;
+
+    try {
+      await deleteEntry(entryToDelete);
+
+      // 목록에서 삭제된 일기 제거
+      setEntries((prev) => prev.filter((e) => e.id !== entryToDelete));
+      setMonthlyEntries((prev) => prev.filter((e) => e.id !== entryToDelete));
+
+      // 모달이 열려있으면 닫기
+      if (selectedEntry?.id === entryToDelete) {
+        setSelectedEntry(null);
+      }
+    } catch (err) {
+      const apiError = err as ApiError;
+      alert(apiError.message);
+    } finally {
       setEntryToDelete(null);
     }
   };
@@ -122,9 +146,35 @@ export function DiaryList({ language = "en" }: { language?: Language }) {
     setSelectedEntry(entry);
   };
 
-  const handleRetry = (entryId: string) => {
-    // TODO: Implement retry API call
-    console.log("Retry video generation for:", entryId);
+  const handleRetry = async (entryId: string) => {
+    try {
+      const response = await retryVideoGeneration(entryId);
+
+      if (response.data) {
+        // 목록에서 해당 일기 업데이트
+        setEntries((prevEntries) =>
+          prevEntries.map((entry) =>
+            entry.id === entryId ? response.data : entry,
+          ),
+        );
+
+        // 월별 목록도 업데이트 (달력용)
+        setMonthlyEntries((prevEntries) =>
+          prevEntries.map((entry) =>
+            entry.id === entryId ? response.data : entry,
+          ),
+        );
+
+        // 모달의 선택된 entry도 업데이트
+        setSelectedEntry((prev) =>
+          prev?.id === entryId ? response.data : prev,
+        );
+      }
+    } catch (err) {
+      const apiError = err as ApiError;
+      alert(apiError.message);
+      console.error("Failed to retry video generation:", apiError);
+    }
   };
 
   // Get IDs of entries with pending/processing status

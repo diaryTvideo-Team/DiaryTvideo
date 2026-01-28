@@ -6,7 +6,7 @@ import { X, AlertTriangle } from "lucide-react";
 interface DeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
   title: string;
   message: string;
   cancelText: string;
@@ -85,11 +85,16 @@ export function DeleteModal({
             {cancelText}
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
               setIsLoading(true);
-              onConfirm();
-              setIsLoading(false);
-              onClose();
+              try {
+                await onConfirm();
+                onClose();
+              } catch {
+                // 에러는 onConfirm 내부에서 처리 (toast 등)
+              } finally {
+                setIsLoading(false);
+              }
             }}
             disabled={isLoading}
             className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"

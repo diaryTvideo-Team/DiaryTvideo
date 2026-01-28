@@ -3,6 +3,7 @@
 import { Play } from "lucide-react";
 import { Language } from "@repo/types";
 import { translations } from "@/lib/translations";
+import { parseI18nMessage } from "@/lib/api/error-parser";
 
 interface VideoStatusIndicatorProps {
   status: string;
@@ -109,7 +110,9 @@ function BadgeIndicator({
     style: "bg-muted text-muted-foreground",
   };
 
-  const displayText = message || config.defaultText;
+  const displayText =
+    (message ? parseI18nMessage(message, language) : null) ||
+    config.defaultText;
 
   return (
     <div className={`rounded px-2 py-0.5 text-xs ${config.style} ${className}`}>

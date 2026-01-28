@@ -61,23 +61,26 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("[Socket] Connected:", socket.id);
       setIsConnected(true);
     });
 
-    socket.on("disconnect", (reason) => {
-      console.log("[Socket] Disconnected:", reason);
+    socket.on("disconnect", () => {
       setIsConnected(false);
     });
 
     socket.on("connect_error", (error) => {
       console.error("[Socket] Connection error:", error.message);
       setIsConnected(false);
+
+      // 토큰 갱신 후 재연결 시도
+      const freshToken = getAccessToken();
+      if (freshToken && socket.auth) {
+        (socket.auth as Record<string, string>).token = freshToken;
+      }
     });
 
     // video-status 이벤트 수신
     socket.on("video-status", (data: VideoProgressMessage) => {
-      console.log("[Socket] video-status:", data);
       listenersRef.current.forEach((callback) => callback(data));
     });
 

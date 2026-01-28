@@ -6,7 +6,11 @@ interface FormattedDateProps {
   includeTime?: boolean; // 시간 포함 여부 (기본값: false)
 }
 
-export function useFormattedDate({ entry, language, includeTime = false }: FormattedDateProps) {
+export function useFormattedDate({
+  entry,
+  language,
+  includeTime = false,
+}: FormattedDateProps) {
   if (!entry) return null;
 
   // entry.createdAt은 ISO 8601 형식의 UTC 타임스탬프 (예: "2026-01-27T14:30:00Z")

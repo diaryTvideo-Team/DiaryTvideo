@@ -19,7 +19,7 @@ export async function getMonthlyEntries(
 ): Promise<ApiResponse<DiaryData[]>> {
   return api.get<ApiResponse<DiaryData[]>>(
     `/diary/monthly?year=${year}&month=${month}`,
-    { withAuth: true }
+    { withAuth: true },
   );
 }
 
@@ -32,7 +32,24 @@ export async function createEntry(
   });
 }
 
-// TODO: Replace with actual API call to DELETE /api/diary/:id
-export function deleteEntry(): void {
-  console.warn("deleteEntry: API not implemented yet");
+// 다이어리 삭제
+export async function deleteEntry(
+  diaryId: string,
+): Promise<ApiResponse<DiaryData>> {
+  return api.delete<ApiResponse<DiaryData>>(`/diary/${diaryId}`, undefined, {
+    withAuth: true,
+  });
+}
+
+// 비디오 생성 재시도
+export async function retryVideoGeneration(
+  diaryId: string,
+): Promise<ApiResponse<DiaryData>> {
+  return api.post<ApiResponse<DiaryData>>(
+    `/diary/${diaryId}/retry`,
+    {},
+    {
+      withAuth: true,
+    },
+  );
 }

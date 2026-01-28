@@ -5,7 +5,6 @@ import { X, Calendar } from "lucide-react";
 import { useFormattedDate } from "@/lib/formattedDate";
 import { VideoPlayer } from "./video-player";
 import { VideoStatusPlaceholder } from "./video-status-placeholder";
-import { DUMMY_VIDEO } from "@/lib/dummy-video";
 import { DiaryData, Language } from "@repo/types";
 
 interface DiaryModalProps {
@@ -80,18 +79,19 @@ export function DiaryModal({
           {/* Video Player or Status Placeholder */}
           {view === "video" && (
             <div className="mb-6">
-              {entry.videoStatus === "COMPLETED" ? (
+              {entry.videoStatus === "COMPLETED" && entry.videoUrl ? (
                 <VideoPlayer
-                  videoUrl={entry.videoUrl || DUMMY_VIDEO.videoUrl}
-                  thumbnailUrl={entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl}
-                  subtitleUrl={entry.subtitleUrl || DUMMY_VIDEO.subtitleUrl}
+                  videoUrl={entry.videoUrl}
+                  thumbnailUrl={entry.thumbnailUrl ?? undefined}
+                  subtitleUrl={entry.subtitleUrl ?? undefined}
                   language={language}
                 />
               ) : (
                 <VideoStatusPlaceholder
                   status={entry.videoStatus}
-                  thumbnailUrl={entry.thumbnailUrl}
                   language={language}
+                  message={entry.videoMessage ?? undefined}
+                  retryCount={entry.videoRetryCount} // 이 줄 추가
                   onRetry={
                     entry.videoStatus === "FAILED" && onRetry
                       ? () => onRetry(entry.id)
