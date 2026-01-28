@@ -23,4 +23,20 @@ export const DiaryErrors = {
     en: "Invalid diary date",
     ko: "유효하지 않은 일기 날짜입니다.",
   }),
+  DIARY_RETRY_LIMIT_EXCEEDED: i18nMessage({
+    en: "Maximum retry attempts exceeded",
+    ko: "최대 재시도 횟수를 초과했습니다.",
+  }),
+  DIARY_RETRY_NOT_FAILED: i18nMessage({
+    en: "Can only retry failed video generation",
+    ko: "실패한 영상만 재시도할 수 있습니다.",
+  }),
+  DIARY_TITLE_TOO_LONG: i18nMessage({
+    en: "Title must be 70 characters or less",
+    ko: "제목은 70자 이하로 입력해 주세요.",
+  }),
+  DIARY_CONTENT_TOO_LONG: i18nMessage({
+    en: "Content must be 5000 characters or less",
+    ko: "내용은 5000자 이하로 입력해 주세요.",
+  }),
 } as const;
