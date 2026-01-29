@@ -7,8 +7,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @repo/types build 2>/dev/null || true
 RUN cd apps/api && npx prisma generate
-RUN pnpm --filter diarytvideo-api build
-
+RUN cd apps/api && npx nest build
 # production
 FROM node:20-alpine AS production
 RUN apk add --no-cache ffmpeg
