@@ -1,4 +1,5 @@
 import { NestFactory } from "@nestjs/core";
+import helmet from "helmet";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
@@ -8,6 +9,7 @@ async function bootstrap() {
       ? ["warn", "error"]
       : ["log", "error", "warn", "debug", "verbose"],
   });
+  app.use(helmet());
   app.enableCors({
     origin: process.env.FRONTEND_URL,
     credentials: true,

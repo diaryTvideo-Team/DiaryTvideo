@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { DiaryService } from "./diary.service";
@@ -56,6 +57,7 @@ export class DiaryController {
   }
 
   @Post()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async createEntry(
     @CurrentUser() user: JwtAccessPayload,
     @Body(new ZodValidationPipe(CreateDiaryRequestSchema))
@@ -65,6 +67,7 @@ export class DiaryController {
   }
 
   @Delete(":id")
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async deleteEntry(
     @CurrentUser() user: JwtAccessPayload,
     @Param(new ZodValidationPipe(DeleteDiaryParamsSchema))
@@ -74,6 +77,7 @@ export class DiaryController {
   }
 
   @Post(":id/retry")
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   async retryVideoGeneration(
     @CurrentUser() user: JwtAccessPayload,
     @Param(new ZodValidationPipe(RetryVideoDiaryParamsSchema))
