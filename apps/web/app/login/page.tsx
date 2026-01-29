@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth-provider";
 import { AuthForm } from "@/components/auth-form";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
@@ -5,6 +10,20 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { COOMON_TRANSLATIONS } from "@/lib/translations";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/diary");
+    }
+  }, [user, isLoading, router]);
+
+  // 로딩 중이거나 이미 로그인된 경우 폼 숨김
+  if (isLoading || user) {
+    return null;
+  }
+
   return (
     <main className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border">

@@ -1,0 +1,32 @@
+import { Module } from "@nestjs/common";
+import { JwtModule } from "@nestjs/jwt";
+import { AuthController } from "./auth.controller";
+import { AuthService } from "./auth.service";
+import { PasswordService } from "./password.service";
+import { TokenService } from "./token.service";
+import { EmailService } from "./email.service";
+import { VerificationCodeService } from "./verification-code.service";
+import { UserModule } from "../user/user.module";
+import { PassportModule } from "@nestjs/passport";
+import { JwtStrategy } from "./strategies/jwt.strategy";
+import { ResetTokenService } from "./reset-token.service";
+
+@Module({
+  imports: [
+    PassportModule,
+    JwtModule.register({}), // Empty config, we'll provide secrets per-call
+    UserModule,
+  ],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    PasswordService,
+    TokenService,
+    EmailService,
+    VerificationCodeService,
+    ResetTokenService,
+    JwtStrategy,
+  ],
+  exports: [AuthService, TokenService, PasswordService],
+})
+export class AuthModule {}

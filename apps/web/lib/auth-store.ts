@@ -1,79 +1,75 @@
 "use client";
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  createdAt: string;
+import {
+  ApiResponse,
+  AuthData,
+  LoginRequest,
+  ResetPasswordRequest,
+  ResetTokenData,
+  SignupRequest,
+  VerifyEmailRequest,
+} from "@repo/types";
+import { api, setTokens, clearTokens } from "./api";
+
+export async function signup(data: SignupRequest): Promise<ApiResponse> {
+  return api.post<ApiResponse>("/auth/signup", data);
 }
 
-// TODO: Replace with actual API call to POST /api/auth/register
-export function register(): { success: boolean; error?: string } {
-  console.warn("register: API not implemented yet");
-  return { success: false, error: "API not implemented" };
+export async function signin(
+  data: LoginRequest,
+): Promise<ApiResponse<AuthData>> {
+  const response = await api.post<ApiResponse<AuthData>>("/auth/signin", data);
+  if (response.data) {
+    setTokens(
+      response.data.tokens.accessToken,
+      response.data.tokens.refreshToken,
+    );
+  }
+  return response;
 }
 
-// TODO: Replace with actual API call to POST /api/auth/login
-export function login(): { success: boolean; user?: User; error?: string } {
-  console.warn("login: API not implemented yet");
-  return { success: false, error: "API not implemented" };
+export async function logout(): Promise<void> {
+  try {
+    await api.post<ApiResponse>("/auth/logout", undefined, { withAuth: true });
+  } finally {
+    clearTokens();
+  }
 }
 
-// TODO: Replace with actual API call to POST /api/auth/logout
-export function logout() {
-  console.warn("logout: API not implemented yet");
+export async function verifyEmail(
+  data: VerifyEmailRequest,
+): Promise<ApiResponse<AuthData>> {
+  const response = await api.post<ApiResponse<AuthData>>(
+    "/auth/verify-email",
+    data,
+  );
+  if (response.data) {
+    setTokens(
+      response.data.tokens.accessToken,
+      response.data.tokens.refreshToken,
+    );
+  }
+  return response;
 }
 
-// TODO: Replace with actual API call to GET /api/auth/me
-export function getCurrentUser(): User | null {
-  console.warn("getCurrentUser: API not implemented yet");
-  return null;
+export async function resendVerification(email: string): Promise<ApiResponse> {
+  return api.post<ApiResponse>("/auth/resend-verification", { email });
 }
 
-// TODO: Replace with actual API call to PATCH /api/user/name
-export function updateName(): { success: boolean; error?: string } {
-  console.warn("updateName: API not implemented yet");
-  return { success: false, error: "API not implemented" };
+export async function forgotPassword(email: string): Promise<ApiResponse> {
+  return api.post<ApiResponse>("/auth/forgot-password", { email });
 }
 
-// TODO: Replace with actual API call to PATCH /api/user/password
-export function updatePassword(): { success: boolean; error?: string } {
-  console.warn("updatePassword: API not implemented yet");
-  return { success: false, error: "API not implemented" };
+export async function verifyResetToken(
+  token: string,
+): Promise<ApiResponse<ResetTokenData>> {
+  return api.get<ApiResponse<ResetTokenData>>(
+    `/auth/verify-reset-token?token=${token}`,
+  );
 }
 
-// TODO: Replace with actual API call to DELETE /api/user
-export function deleteAccount(): { success: boolean; error?: string } {
-  console.warn("deleteAccount: API not implemented yet");
-  return { success: false, error: "API not implemented" };
-}
-
-// TODO: Replace with actual API call to POST /api/auth/verification/send
-export function sendVerificationCode(): { success: boolean } {
-  console.warn("sendVerificationCode: API not implemented yet");
-  return { success: false };
-}
-
-// TODO: Replace with actual API call to POST /api/auth/verification/verify
-export function verifyCode(): { success: boolean; error?: string } {
-  console.warn("verifyCode: API not implemented yet");
-  return { success: false, error: "API not implemented" };
-}
-
-// TODO: Replace with actual API call to POST /api/auth/verification/resend
-export function resendVerificationCode(): { success: boolean } {
-  console.warn("resendVerificationCode: API not implemented yet");
-  return { success: false };
-}
-
-// TODO: Replace with actual API call to POST /api/auth/password-reset/send
-export function sendPasswordResetEmail(): { success: boolean } {
-  console.warn("sendPasswordResetEmail: API not implemented yet");
-  return { success: false };
-}
-
-// TODO: Replace with actual API call to POST /api/auth/password-reset/resend
-export function resendPasswordResetEmail(): { success: boolean } {
-  console.warn("resendPasswordResetEmail: API not implemented yet");
-  return { success: false };
+export async function resetPassword(
+  data: ResetPasswordRequest,
+): Promise<ApiResponse> {
+  return api.post<ApiResponse>("/auth/reset-password", data);
 }

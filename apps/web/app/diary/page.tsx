@@ -15,8 +15,8 @@ export default function DiaryPage() {
   const router = useRouter();
   const { language } = useLanguage();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/");
   };
 

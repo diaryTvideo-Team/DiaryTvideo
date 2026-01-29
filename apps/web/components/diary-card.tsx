@@ -1,20 +1,20 @@
 "use client";
 
-import { Play, Trash2, Calendar, Eye } from "lucide-react";
-import type { DiaryEntry } from "@/lib/diary-store";
-import { Language } from "@/lib/translations";
+import { memo } from "react";
+import { Trash2, Calendar, Eye } from "lucide-react";
 import { useFormattedDate } from "@/lib/formattedDate";
-import { DUMMY_VIDEO } from "@/lib/dummy-video";
+import { DiaryData, Language } from "@repo/types";
+import { VideoStatusIndicator } from "./video-status-indicator";
 
 interface DiaryCardProps {
-  entry: DiaryEntry;
+  entry: DiaryData;
   view: "video" | "text";
   onDelete: (id: string) => void;
-  onView: (entry: DiaryEntry) => void;
+  onView: (entry: DiaryData) => void;
   language: Language;
 }
 
-export function DiaryCard({
+export const DiaryCard = memo(function DiaryCard({
   entry,
   view,
   onDelete,
@@ -31,9 +31,9 @@ export function DiaryCard({
           className="relative aspect-video w-full overflow-hidden"
         >
           {/* Thumbnail or gradient background */}
-          {entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl ? (
+          {entry.thumbnailUrl ? (
             <img
-              src={entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl}
+              src={entry.thumbnailUrl}
               alt={entry.title}
               className="w-full h-full object-cover blur-sm"
             />
@@ -41,17 +41,22 @@ export function DiaryCard({
             <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/30" />
           )}
 
-          {/* Play button overlay */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-card/90 shadow-lg transition-transform group-hover:scale-110">
-              <Play className="h-6 w-6 text-primary ml-1" fill="currentColor" />
-            </div>
-          </div>
+          {/* Status overlay */}
+          <VideoStatusIndicator
+            status={entry.videoStatus}
+            variant="overlay"
+            language={language}
+            message={entry.videoMessage ?? undefined}
+          />
 
-          {/* AI Generated badge */}
-          <div className="absolute bottom-2 right-2 rounded bg-foreground/80 px-2 py-0.5 text-xs text-background">
-            {language === "ko" ? "AI 생성됨" : "AI Generated"}
-          </div>
+          {/* Status badge */}
+          <VideoStatusIndicator
+            status={entry.videoStatus}
+            variant="badge"
+            language={language}
+            message={entry.videoMessage ?? undefined}
+            className="absolute bottom-2 right-2"
+          />
         </button>
         <div className="p-4">
           <h3 className="font-serif text-lg font-semibold text-foreground line-clamp-1">
@@ -125,6 +130,33 @@ export function DiaryCard({
       >
         {language === "ko" ? "더보기" : "Read more"}
       </button>
+    </div>
+  );
+});
+
+export function DiaryCardSkeleton({ view }: { view: "video" | "text" }) {
+  if (view === "video") {
+    return (
+      <div className="overflow-hidden rounded-lg bg-card shadow-sm">
+        <div className="aspect-video w-full animate-pulse bg-muted" />
+        <div className="p-4 space-y-2">
+          <div className="h-5 w-32 animate-pulse bg-muted rounded" />
+          <div className="h-4 w-full animate-pulse bg-muted rounded" />
+          <div className="h-4 w-2/3 animate-pulse bg-muted rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+      <div className="h-6 w-48 animate-pulse bg-muted rounded" />
+      <div className="mt-2 h-4 w-24 animate-pulse bg-muted rounded" />
+      <div className="mt-3 space-y-2">
+        <div className="h-4 w-full animate-pulse bg-muted rounded" />
+        <div className="h-4 w-3/4 animate-pulse bg-muted rounded" />
+        <div className="h-4 w-1/2 animate-pulse bg-muted rounded" />
+      </div>
     </div>
   );
 }

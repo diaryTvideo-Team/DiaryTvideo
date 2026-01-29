@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,23 @@ import { useAuth } from "@/components/auth-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle, useLanguage } from "@/components/language-toggle";
 import { translations } from "@/lib/translations";
-import { updateName, updatePassword, deleteAccount } from "@/lib/auth-store";
+import {
+  getMe,
+  updateName,
+  updatePassword,
+  deleteAccount,
+} from "@/lib/user-store";
+import { ApiError } from "@/lib/api";
+import { UserData } from "@repo/types";
 
 export default function AccountPage() {
-  const { user, isLoading, refreshUser, logout } = useAuth();
+  const { user, isLoading, logout, setUser } = useAuth();
   const router = useRouter();
   const { language } = useLanguage();
+
+  // Profile state
+  const [userProfile, setUserProfile] = useState<UserData | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   // Name change state
   const [newName, setNewName] = useState("");
@@ -56,7 +67,28 @@ export default function AccountPage() {
 
   const t = translations[language];
 
-  const handleNameChange = (e: React.FormEvent) => {
+  // Fetch user profile on mount
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const response = await getMe();
+        if (response.data) {
+          setUserProfile(response.data);
+        }
+      } catch (error) {
+        const apiError = error as ApiError;
+        console.error("Failed to fetch profile:", apiError.message);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const handleNameChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setNameError("");
     setNameSuccess(false);
@@ -64,19 +96,24 @@ export default function AccountPage() {
     if (!user || !newName.trim()) return;
 
     setIsUpdatingName(true);
-    const result = updateName(user.id, newName.trim());
-    if (result.success) {
-      setNameSuccess(true);
-      setNewName("");
-      refreshUser?.();
-      setTimeout(() => setNameSuccess(false), 3000);
-    } else {
-      setNameError(result.error || "Failed to update name");
+    try {
+      const response = await updateName({ name: newName.trim() });
+      if (response.success && response.data) {
+        setNameSuccess(true);
+        setNewName("");
+        setUserProfile(response.data);
+        setUser({ ...user, name: response.data.name });
+        setTimeout(() => setNameSuccess(false), 3000);
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+      setNameError(apiError.message);
+    } finally {
+      setIsUpdatingName(false);
     }
-    setIsUpdatingName(false);
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError("");
     setPasswordSuccess(false);
@@ -89,32 +126,43 @@ export default function AccountPage() {
     }
 
     setIsUpdatingPassword(true);
-    const result = updatePassword(user.id, currentPassword, newPasswordValue);
-    if (result.success) {
-      setPasswordSuccess(true);
-      setCurrentPassword("");
-      setNewPasswordValue("");
-      setConfirmPassword("");
-      setTimeout(() => setPasswordSuccess(false), 3000);
-    } else {
-      setPasswordError(result.error || "Failed to update password");
+    try {
+      const response = await updatePassword({
+        currentPassword,
+        newPassword: newPasswordValue,
+      });
+      if (response.success) {
+        setPasswordSuccess(true);
+        setCurrentPassword("");
+        setNewPasswordValue("");
+        setConfirmPassword("");
+        setTimeout(() => setPasswordSuccess(false), 3000);
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+      setPasswordError(apiError.message);
+    } finally {
+      setIsUpdatingPassword(false);
     }
-    setIsUpdatingPassword(false);
   };
 
-  const handleDeleteAccount = (e: React.FormEvent) => {
+  const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setDeleteError("");
 
     if (!user) return;
 
     setIsDeletingAccount(true);
-    const result = deleteAccount(user.id, deletePassword);
-    if (result.success) {
-      logout();
-      router.push("/");
-    } else {
-      setDeleteError(result.error || "Failed to delete account");
+    try {
+      const response = await deleteAccount({ password: deletePassword });
+      if (response.success) {
+        await logout();
+        router.push("/");
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+      setDeleteError(apiError.message);
+    } finally {
       setIsDeletingAccount(false);
     }
   };
@@ -131,16 +179,15 @@ export default function AccountPage() {
     return null;
   }
 
-  const memberSince = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString(
-        language === "ko" ? "ko-KR" : "en-US",
-        {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        },
-      )
-    : "-";
+  // Format memberSince date
+  const formatDate = (date: Date | string) => {
+    const d = new Date(date);
+    return d.toLocaleDateString(language === "ko" ? "ko-KR" : "en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <main className="min-h-screen bg-background">
@@ -186,7 +233,15 @@ export default function AccountPage() {
                   <p className="text-sm text-muted-foreground">
                     {t.memberSince}
                   </p>
-                  <p className="font-medium">{memberSince}</p>
+                  {isLoadingProfile ? (
+                    <div className="h-5 w-24 animate-pulse bg-muted rounded" />
+                  ) : (
+                    <p className="font-medium">
+                      {userProfile?.createdAt
+                        ? formatDate(userProfile.createdAt)
+                        : "-"}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>

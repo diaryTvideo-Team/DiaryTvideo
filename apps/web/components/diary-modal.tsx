@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { X, Calendar } from "lucide-react";
-import type { DiaryEntry } from "@/lib/diary-store";
-import { Language } from "@/lib/translations";
 import { useFormattedDate } from "@/lib/formattedDate";
 import { VideoPlayer } from "./video-player";
-import { DUMMY_VIDEO } from "@/lib/dummy-video";
+import { VideoStatusPlaceholder } from "./video-status-placeholder";
+import { DiaryData, Language } from "@repo/types";
 
 interface DiaryModalProps {
-  entry: DiaryEntry | null;
+  entry: DiaryData | null;
   onClose: () => void;
   language: Language;
   view: "video" | "text";
+  onRetry?: (entryId: string) => void;
 }
 
 export function DiaryModal({
@@ -20,9 +20,14 @@ export function DiaryModal({
   onClose,
   language,
   view,
+  onRetry,
 }: DiaryModalProps) {
   const [showFullContent, setShowFullContent] = useState(false);
-  const formattedDate = useFormattedDate({ entry, language });
+  const formattedDate = useFormattedDate({
+    entry,
+    language,
+    includeTime: true,
+  });
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -71,15 +76,29 @@ export function DiaryModal({
           className="overflow-y-auto p-6"
           style={{ maxHeight: "calc(85vh - 73px)" }}
         >
-          {/* Video Player */}
-          {view === "video" && (entry.videoUrl || DUMMY_VIDEO.videoUrl) && (
+          {/* Video Player or Status Placeholder */}
+          {view === "video" && (
             <div className="mb-6">
-              <VideoPlayer
-                videoUrl={entry.videoUrl || DUMMY_VIDEO.videoUrl}
-                thumbnailUrl={entry.thumbnailUrl || DUMMY_VIDEO.thumbnailUrl}
-                subtitleUrl={entry.subtitleUrl || DUMMY_VIDEO.subtitleUrl}
-                language={language}
-              />
+              {entry.videoStatus === "COMPLETED" && entry.videoUrl ? (
+                <VideoPlayer
+                  videoUrl={entry.videoUrl}
+                  thumbnailUrl={entry.thumbnailUrl ?? undefined}
+                  subtitleUrl={entry.subtitleUrl ?? undefined}
+                  language={language}
+                />
+              ) : (
+                <VideoStatusPlaceholder
+                  status={entry.videoStatus}
+                  language={language}
+                  message={entry.videoMessage ?? undefined}
+                  retryCount={entry.videoRetryCount} // 이 줄 추가
+                  onRetry={
+                    entry.videoStatus === "FAILED" && onRetry
+                      ? () => onRetry(entry.id)
+                      : undefined
+                  }
+                />
+              )}
             </div>
           )}
 

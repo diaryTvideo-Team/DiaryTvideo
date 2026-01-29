@@ -1,4 +1,4 @@
-export type Language = "en" | "ko";
+import { Language } from "@repo/types";
 
 export const COOMON_TRANSLATIONS = {
   project_name: "DiaryTvideo",
@@ -8,7 +8,7 @@ export const COOMON_TRANSLATIONS = {
   contact: "Contact",
 };
 
-export const translations = {
+export const translations: { [key in Language]: { [key: string]: string } } = {
   en: {
     // Navigation
     project_name: COOMON_TRANSLATIONS.project_name,
@@ -60,13 +60,30 @@ export const translations = {
     // Password Reset Page
     forgotPassword: "Forgot your password?",
     resetPassword: "Reset Password",
-    passwordResetEmailSent:
-      "A password reset link has been sent to your email.",
-    checkEmailForReset: "Check your email to reset your password.",
+    enterEmailForReset:
+      "Enter your email address to receive a password reset link",
+    sendResetLink: "Send Reset Link",
+    passwordResetEmailSentTo: "Password reset link has been sent to:",
+    resendAvailableIn: "You can resend in {seconds} seconds",
     didntReceiveEmail: "Didn't receive the email?",
     resendEmail: "Resend email",
     verificationCodeResent: "Verification code has been resent!",
     passwordResetEmailResent: "Password reset email has been resent!",
+    enterNewPassword: "Enter your new password",
+    confirmPassword: "Confirm Password",
+    resetPasswordButton: "Reset Password",
+    goToLogin: "Go to Login",
+
+    // Password Reset Errors
+    invalidAccess: "Invalid Access",
+    invalidAccessDesc: "This page requires a valid reset token",
+    linkExpired: "Link Expired",
+    linkExpiredDesc: "This reset link has expired",
+    invalidLink: "Invalid Link",
+    invalidLinkDesc: "This reset link is invalid",
+    linkAlreadyUsed: "Link Already Used",
+    linkAlreadyUsedDesc: "This reset link has already been used",
+    requestNewLink: "Request New Link",
 
     // Diary Page
     newEntryTitle: "Title",
@@ -82,6 +99,8 @@ export const translations = {
     filtered: "filtered",
     noEntriesMatch: "No entries match your criteria.",
     clearAllFilters: "Clear All Filters",
+    failedToLoadEntries: "Failed to load entries",
+    tryAgain: "Try again",
     deleteEntryTitle: "Delete Entry",
     deleteEntryMessage:
       "Are you sure you want to delete this entry? This action cannot be undone.",
@@ -105,10 +124,11 @@ export const translations = {
     updatePassword: "Update Password",
     passwordUpdated: "Password updated successfully",
     passwordsDoNotMatch: "Passwords do not match",
+    passwordUppercaseRequired:
+      "Password must contain at least one uppercase letter",
     cancelMembership: "Cancel Membership",
     cancelMembershipWarning:
       "This action will permanently delete your account and all your diary entries. This cannot be undone.",
-    confirmPassword: "Confirm Password",
     deleteAccount: "Delete Account",
     accountDeleted: "Account deleted successfully",
     backToDiary: "Back to Diary",
@@ -117,6 +137,18 @@ export const translations = {
     developedBy: COOMON_TRANSLATIONS.developedBy,
     poweredBy: COOMON_TRANSLATIONS.poweredBy,
     contact: COOMON_TRANSLATIONS.contact,
+
+    // Video Status
+    videoStatusPending: "Pending",
+    videoStatusProcessing: "Generating",
+    videoStatusCompleted: "AI Generated",
+    videoStatusFailed: "Failed",
+    videoStatusPendingTitle: "Waiting to generate video",
+    videoStatusPendingSubtitle: "Please wait a moment",
+    videoStatusProcessingTitle: "Generating your video",
+    videoStatusProcessingSubtitle: "We'll let you know when it's done",
+    videoStatusFailedTitle: "Video generation failed",
+    videoStatusRetry: "Retry",
   },
   ko: {
     // Navigation
@@ -169,12 +201,29 @@ export const translations = {
     // Password Reset Page
     forgotPassword: "비밀번호를 잊으셨나요?",
     resetPassword: "비밀번호 재설정",
-    passwordResetEmailSent: "비밀번호 재설정 링크가 이메일로 전송되었습니다.",
-    checkEmailForReset: "이메일을 확인하여 비밀번호를 재설정하세요.",
+    enterEmailForReset: "비밀번호 재설정 링크를 받을 이메일 주소를 입력하세요",
+    sendResetLink: "재설정 링크 전송",
+    passwordResetEmailSentTo: "비밀번호 재설정 링크가 전송되었습니다:",
+    resendAvailableIn: "{seconds}초 후에 재전송할 수 있습니다",
     didntReceiveEmail: "이메일을 받지 못하셨나요?",
     resendEmail: "이메일 재전송",
     verificationCodeResent: "인증 코드가 재전송되었습니다!",
     passwordResetEmailResent: "비밀번호 재설정 이메일이 재전송되었습니다!",
+    enterNewPassword: "새로운 비밀번호를 입력해주세요",
+    confirmPassword: "비밀번호 확인",
+    resetPasswordButton: "비밀번호 변경",
+    goToLogin: "로그인으로 이동",
+
+    // Password Reset Errors
+    invalidAccess: "잘못된 접근",
+    invalidAccessDesc: "유효한 재설정 토큰이 필요합니다",
+    linkExpired: "링크 만료",
+    linkExpiredDesc: "재설정 링크가 만료되었습니다",
+    invalidLink: "유효하지 않은 링크",
+    invalidLinkDesc: "유효하지 않은 재설정 링크입니다",
+    linkAlreadyUsed: "이미 사용된 링크",
+    linkAlreadyUsedDesc: "이미 사용된 재설정 링크입니다",
+    requestNewLink: "새 링크 요청",
 
     // Diary Page
     newEntryTitle: "제목",
@@ -190,6 +239,8 @@ export const translations = {
     filtered: "필터링됨",
     noEntriesMatch: "조건에 맞는 일기가 없습니다.",
     clearAllFilters: "모든 필터 지우기",
+    failedToLoadEntries: "일기를 불러올 수 없습니다",
+    tryAgain: "다시 시도",
     deleteEntryTitle: "일기 삭제",
     deleteEntryMessage:
       "정말로 이 일기를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
@@ -213,10 +264,10 @@ export const translations = {
     updatePassword: "비밀번호 업데이트",
     passwordUpdated: "비밀번호가 성공적으로 업데이트되었습니다",
     passwordsDoNotMatch: "비밀번호가 일치하지 않습니다",
+    passwordUppercaseRequired: "비밀번호에 대문자가 최소 1개 포함되어야 합니다",
     cancelMembership: "회원 탈퇴",
     cancelMembershipWarning:
       "이 작업은 계정과 모든 일기를 영구적으로 삭제합니다. 되돌릴 수 없습니다.",
-    confirmPassword: "비밀번호 확인",
     deleteAccount: "계정 삭제",
     accountDeleted: "계정이 성공적으로 삭제되었습니다",
     backToDiary: "일기장으로 돌아가기",
@@ -225,5 +276,17 @@ export const translations = {
     developedBy: COOMON_TRANSLATIONS.developedBy,
     poweredBy: COOMON_TRANSLATIONS.poweredBy,
     contact: COOMON_TRANSLATIONS.contact,
+
+    // Video Status
+    videoStatusPending: "대기 중",
+    videoStatusProcessing: "생성 중",
+    videoStatusCompleted: "AI 생성됨",
+    videoStatusFailed: "실패",
+    videoStatusPendingTitle: "영상을 생성하기 위해 대기 중입니다",
+    videoStatusPendingSubtitle: "잠시만 기다려 주세요",
+    videoStatusProcessingTitle: "영상을 생성하고 있습니다",
+    videoStatusProcessingSubtitle: "완료되면 알려드릴게요",
+    videoStatusFailedTitle: "영상 생성에 실패했습니다",
+    videoStatusRetry: "다시 시도",
   },
 } as const;

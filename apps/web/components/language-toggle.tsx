@@ -11,8 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-export type Language = "en" | "ko";
+import { Language } from "@repo/types";
 
 const LanguageContext = createContext<{
   language: Language;
@@ -29,10 +28,8 @@ export function useLanguage() {
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const stored = localStorage.getItem("language") as Language;
     if (stored === "en" || stored === "ko") {
       setLanguageState(stored);
@@ -43,10 +40,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(lang);
     localStorage.setItem("language", lang);
   };
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage }}>
