@@ -59,12 +59,13 @@ describe("VideoProducer", () => {
       "generate-video",
       jobData,
       expect.objectContaining({
-        jobId: "diary-123",
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        jobId: expect.stringContaining("diary-123"),
       }),
     );
   });
 
-  it("should not throw error when queue fails", async () => {
+  it("should throw error when queue fails", async () => {
     mockQueue.add.mockRejectedValue(new Error("Queue error"));
 
     const jobData = {
@@ -74,9 +75,8 @@ describe("VideoProducer", () => {
       content: "Test content",
     };
 
-    // 에러를 던지지 않아야 함
-    await expect(
-      producer.addVideoGenerationJob(jobData),
-    ).resolves.not.toThrow();
+    await expect(producer.addVideoGenerationJob(jobData)).rejects.toThrow(
+      "Queue error",
+    );
   });
 });
