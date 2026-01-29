@@ -26,10 +26,13 @@ jobs:
       - name: Enable Corepack & pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@9.12.0 --activate
+          corepack prepare pnpm@10.26.1 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter diarytvideo-api exec prisma generate
 
       - name: Lint
         run: pnpm lint
