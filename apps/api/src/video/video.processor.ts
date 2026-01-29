@@ -15,6 +15,7 @@ import { FfmpegService } from "./services/ffmpeg.service";
 import { VideoStatus } from "@prisma/client";
 
 @Processor("video-generation", {
+  concurrency: 2, // 동시 처리 가능한 작업 수
   lockDuration: 20 * 60 * 1000, // 20분 - 긴 영상 처리를 위한 lock 유지
 })
 export class VideoProcessor extends WorkerHost {
