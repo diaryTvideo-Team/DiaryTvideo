@@ -25,9 +25,10 @@ COPY --from=build /app/node_modules/.pnpm ./node_modules/.pnpm
 # 워크스페이스 의존성: @repo/types
 COPY --from=build /app/packages/types/dist ./packages/types/dist
 COPY --from=build /app/packages/types/package.json ./packages/types/package.json
+COPY --from=build /app/packages/types/node_modules ./packages/types/node_modules
 
 ENV NODE_ENV=production
 EXPOSE 4000
 
 WORKDIR /app/apps/api
-CMD ["node", "dist/main"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
