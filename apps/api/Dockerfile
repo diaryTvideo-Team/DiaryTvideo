@@ -16,6 +16,7 @@ WORKDIR /app
 # API 빌드 결과물
 COPY --from=build /app/apps/api/dist ./apps/api/dist
 COPY --from=build /app/apps/api/prisma ./apps/api/prisma
+COPY --from=build /app/apps/api/prisma.config.ts ./apps/api/prisma.config.ts
 COPY --from=build /app/apps/api/package.json ./apps/api/package.json
 
 # 의존성 (pnpm 심링크 구조 유지)
