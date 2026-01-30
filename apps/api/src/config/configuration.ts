@@ -30,15 +30,7 @@ export default () => {
       refreshExpiration: env.JWT_REFRESH_EXPIRATION,
     },
     email: {
-      smtp: {
-        host: env.SMTP_HOST,
-        port: parseInt(env.SMTP_PORT, 10) || 587,
-        secure: env.SMTP_SECURE === "true",
-        auth: {
-          user: env.SMTP_USER,
-          pass: env.SMTP_PASS,
-        },
-      },
+      resendApiKey: env.RESEND_API_KEY,
       from: env.EMAIL_FROM,
     },
     frontend: {

@@ -3,9 +3,7 @@ import { z } from "zod";
 const PRODUCTION_REQUIRED_KEYS = [
   "JWT_ACCESS_SECRET",
   "JWT_REFRESH_SECRET",
-  "SMTP_HOST",
-  "SMTP_USER",
-  "SMTP_PASS",
+  "RESEND_API_KEY",
   "FRONTEND_URL",
   "AWS_ACCESS_KEY_ID",
   "AWS_SECRET_ACCESS_KEY",
@@ -33,12 +31,8 @@ export const envSchema = z
     JWT_ACCESS_EXPIRATION: z.string().default("15m"),
     JWT_REFRESH_EXPIRATION: z.string().default("7d"),
 
-    // SMTP
-    SMTP_HOST: z.string().optional(),
-    SMTP_PORT: z.string().default("587"),
-    SMTP_SECURE: z.string().default("false"),
-    SMTP_USER: z.string().optional(),
-    SMTP_PASS: z.string().optional(),
+    // Email (Resend)
+    RESEND_API_KEY: z.string().optional(),
     EMAIL_FROM: z.string().default("noreply@diarytvideo.com"),
 
     // Frontend
