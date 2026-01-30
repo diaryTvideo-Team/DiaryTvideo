@@ -1,23 +1,16 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import * as nodemailer from "nodemailer";
-import { Transporter } from "nodemailer";
+import { Resend } from "resend";
 
 @Injectable()
 export class EmailService {
-  private transporter: Transporter;
+  private resend: Resend;
   private readonly logger = new Logger(EmailService.name);
 
   constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>("email.smtp.host"),
-      port: this.configService.get<number>("email.smtp.port"),
-      secure: this.configService.get<boolean>("email.smtp.secure"),
-      auth: {
-        user: this.configService.get<string>("email.smtp.auth.user"),
-        pass: this.configService.get<string>("email.smtp.auth.pass"),
-      },
-    });
+    this.resend = new Resend(
+      this.configService.get<string>("email.resendApiKey"),
+    );
   }
 
   async sendVerificationEmail(
@@ -68,8 +61,8 @@ export class EmailService {
     `;
 
     try {
-      await this.transporter.sendMail({
-        from: this.configService.get<string>("email.from"),
+      await this.resend.emails.send({
+        from: this.configService.get<string>("email.from") as string,
         to: email,
         subject: "Verify Your Email - DiaryTVideo",
         html,
@@ -147,8 +140,8 @@ export class EmailService {
     `;
 
     try {
-      await this.transporter.sendMail({
-        from: this.configService.get<string>("email.from"),
+      await this.resend.emails.send({
+        from: this.configService.get<string>("email.from") as string,
         to: email,
         subject: "Reset Your Password - DiaryTVideo",
         html,
